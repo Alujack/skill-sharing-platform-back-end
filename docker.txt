@@ -1,0 +1,8 @@
+docker run -d \
+  --name skill_sharin_db_container \
+  -e POSTGRES_USER=alujack \
+  -e POSTGRES_PASSWORD=Yan%112233 \
+  -e POSTGRES_DB=skill_sharin_db \
+  -p 5434:5432 \
+  -v pgdata:/var/lib/postgresql/data \
+  postgres:16

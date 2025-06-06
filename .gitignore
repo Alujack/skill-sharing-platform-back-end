@@ -1,0 +1,4 @@
+node_modules
+# Keep environment variables out of version control
+.env
+*/social-auth-ssp-firebase-adminsdk-ce4ca-66c2c31ce2.json

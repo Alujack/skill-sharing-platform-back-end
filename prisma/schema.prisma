@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  name       String
+  email      String   @unique
+  password   String
+  role       UserRole @default(User)
+  phone      String?
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  instructorProfile InstructorProfile?
+  enrollments      Enrollment[]
+  wishlists        Wishlist[]
+}
+
+enum UserRole {
+  Admin
+  Instructor
+  User
+  Student
+}
+
+model InstructorProfile {
+  id         Int     @id @default(autoincrement())
+  userId     Int     @unique
+  bio        String?
+  isApproved Boolean @default(false)
+
+  user     User    @relation(fields: [userId], references: [id])
+  courses  Course[]
+}
+
+model Course {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String
+  price        Float
+  instructorId Int
+  categoryId   Int
+  createdAt    DateTime @default(now())
+
+  instructor   InstructorProfile @relation(fields: [instructorId], references: [id])
+  category     Category          @relation(fields: [categoryId], references: [id])
+  lessons      Lesson[]
+  enrollments  Enrollment[]
+  wishlists    Wishlist[]
+}
+
+model Category {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  courses Course[]
+}
+
+model Lesson {
+  id       Int    @id @default(autoincrement())
+  title    String
+  videoUrl String
+  courseId Int
+
+  course Course @relation(fields: [courseId], references: [id])
+}
+
+model Enrollment {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  courseId  Int
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+}
+
+model Wishlist {
+  id       Int @id @default(autoincrement())
+  userId   Int
+  courseId Int
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+}

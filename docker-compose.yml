@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: skill-sharing-app
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules  # Prevents host node_modules from overwriting container node_modules
+    environment:
+      - DATABASE_URL=postgresql://alujack:Yan%25112233@localhost:5432/skill_sharin_db
+      - JWT_SECRET=dedff887502d5660867d7782c14e8b8fff2c0fc99df04ad46e0ca8960d8c8b251960f9ee1fd1d595e854ddc007dab2505794432c1a44d279816601184af6176a
+
+# Removed db service and volume

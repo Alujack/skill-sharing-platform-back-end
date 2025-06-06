@@ -1,0 +1,558 @@
+{
+    "info": {
+      "name": "Skill-Sharing Platform API",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Auth",
+        "item": [
+          {
+            "name": "Register",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"user_type\": \"student\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/auth/register",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "auth", "register"]
+              }
+            }
+          },
+          {
+            "name": "Login",
+            "request": {
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/auth/login",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "auth", "login"]
+              }
+            }
+          },
+          {
+            "name": "Me",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "http://localhost:3000/v1/auth/me",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "auth", "me"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Users",
+        "item": [
+          {
+            "name": "List All Users",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3000/v1/users",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "users"]
+              }
+            }
+          },
+          {
+            "name": "Get User Details",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/users/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "users", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Update User",
+            "request": {
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\",\n  \"user_type\": \"instructor\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/users/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "users", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Delete User",
+            "request": {
+              "method": "DELETE",
+              "url": {
+                "raw": "http://localhost:3000/v1/users/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "users", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Create Instructor Profile",
+            "request": {
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"bio\": \"Experienced web developer\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/users/{{id}}/instructor",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "users", "{{id}}", "instructor"]
+              }
+            }
+          },
+          {
+            "name": "Update Instructor Profile",
+            "request": {
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"bio\": \"Updated instructor bio\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/users/{{id}}/instructor",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "users", "{{id}}", "instructor"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Courses",
+        "item": [
+          {
+            "name": "List Courses",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/courses",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "courses"]
+              }
+            }
+          },
+          {
+            "name": "Create Course",
+            "request": {
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"title\": \"React Basics\",\n  \"description\": \"Learn React from scratch\",\n  \"price\": 49.99,\n  \"category_id\": 1\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/courses",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "courses"]
+              }
+            }
+          },
+          {
+            "name": "Get Course Details",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/courses/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "courses", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Update Course",
+            "request": {
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"title\": \"React Advanced\",\n  \"description\": \"Advanced concepts in React\",\n  \"price\": 99.99,\n  \"category_id\": 2\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/courses/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "courses", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Delete Course",
+            "request": {
+              "method": "DELETE",
+              "url": {
+                "raw": "http://localhost:3000/v1/courses/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "courses", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Instructor Courses",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/courses/instructor/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "courses", "instructor", "{{id}}"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Lessons",
+        "item": [
+          {
+            "name": "Add Lesson",
+            "request": {
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"title\": \"Lesson 1\",\n  \"content_url\": \"https://video.com/lesson1\",\n  \"duration\": 30\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/courses/{{id}}/lessons",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "courses", "{{id}}", "lessons"]
+              }
+            }
+          },
+          {
+            "name": "Get Lesson Details",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/lessons/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "lessons", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Update Lesson",
+            "request": {
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"title\": \"Updated Lesson\",\n  \"content_url\": \"https://video.com/updated\",\n  \"duration\": 45\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/lessons/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "lessons", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Delete Lesson",
+            "request": {
+              "method": "DELETE",
+              "url": {
+                "raw": "http://localhost:3000/v1/lessons/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "lessons", "{{id}}"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Enrollments",
+        "item": [
+          {
+            "name": "Enroll in Course",
+            "request": {
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"course_id\": 1\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/enrollments",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "enrollments"]
+              }
+            }
+          },
+          {
+            "name": "Get Enrollment Details",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/enrollments/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "enrollments", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Get User Enrollments",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/enrollments/user/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "enrollments", "user", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Get Course Enrollments",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/enrollments/course/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "enrollments", "course", "{{id}}"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Payments",
+        "item": [
+          {
+            "name": "Create Payment",
+            "request": {
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"user_id\": 1,\n  \"course_id\": 1,\n  \"amount\": 49.99\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/payments",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "payments"]
+              }
+            }
+          },
+          {
+            "name": "Update Payment Status",
+            "request": {
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"status\": \"completed\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/payments/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "payments", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Get User Payments",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/payments/user/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "payments", "user", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Get Course Payments",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/payments/course/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "payments", "course", "{{id}}"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Categories",
+        "item": [
+          {
+            "name": "List Categories",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/categories",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "categories"]
+              }
+            }
+          },
+          {
+            "name": "Create Category",
+            "request": {
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"Development\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/categories",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "categories"]
+              }
+            }
+          },
+          {
+            "name": "Update Category",
+            "request": {
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"Programming\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "http://localhost:3000/v1/categories/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "categories", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Delete Category",
+            "request": {
+              "method": "DELETE",
+              "url": {
+                "raw": "http://localhost:3000/v1/categories/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "categories", "{{id}}"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Instructors",
+        "item": [
+          {
+            "name": "List Instructors",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/instructors",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "instructors"]
+              }
+            }
+          },
+          {
+            "name": "Get Instructor Details",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/instructors/{{id}}",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "instructors", "{{id}}"]
+              }
+            }
+          },
+          {
+            "name": "Get Instructor Stats",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "http://localhost:3000/v1/instructors/{{id}}/stats",
+                "host": ["http://localhost:3000"],
+                "path": ["v1", "instructors", "{{id}}", "stats"]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+  
