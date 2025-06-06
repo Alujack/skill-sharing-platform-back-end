@@ -112,7 +112,7 @@ exports.getInstructorCourses = async (req, res) => {
 
     const courses = await prisma.course.findMany({
       where: { instructorId: instructor.id },
-      // include: { category: true },
+      include: { category: true },
     });
 
     res.json(courses);
