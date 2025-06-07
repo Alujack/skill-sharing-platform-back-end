@@ -18,78 +18,80 @@ async function main() {
   // Create Admin User
   await prisma.user.create({
     data: {
-      name: 'Admin User',
       email: 'admin@example.com',
       password: 'admin123',
       role: 'Admin',
-      phone: faker.phone.number(),
       isVerified: true,
     },
   });
 
   // Create Instructors
   const instructors = await Promise.all(
-    Array.from({ length: 10 }, async () => {
+    Array.from({ length: 5 }, async () => {
       const user = await prisma.user.create({
         data: {
-          name: faker.person.fullName(),
           email: faker.internet.email(),
           password: 'password123',
           role: 'Instructor',
-          phone: faker.phone.number(),
           isVerified: true,
         },
       });
 
-      await prisma.instructorProfile.create({
+      const instructor = await prisma.instructor.create({
         data: {
           userId: user.id,
+          name: faker.person.fullName(),
+          phone: faker.phone.number(),
           bio: faker.lorem.sentences(2),
           isApproved: true,
         },
       });
 
-      return user;
+      return instructor;
     })
   );
 
   // Create Students
   const students = await Promise.all(
-    Array.from({ length: 20 }, () =>
-      prisma.user.create({
+    Array.from({ length: 10 }, async () => {
+      const user = await prisma.user.create({
         data: {
-          name: faker.person.fullName(),
           email: faker.internet.email(),
           password: 'password123',
           role: 'Student',
-          phone: faker.phone.number(),
           isVerified: true,
         },
-      })
-    )
+      });
+
+      const student = await prisma.student.create({
+        data: {
+          userId: user.id,
+          name: faker.person.fullName(),
+          phone: faker.phone.number(),
+        },
+      });
+
+      return student;
+    })
   );
 
   // Create Courses and Lessons
   const courses = await Promise.all(
-    Array.from({ length: 5 }, async () => {
-      const instructorProfile = await prisma.instructorProfile.findFirst({
-        orderBy: { id: 'asc' },
-        where: { isApproved: true },
-      });
-
+    Array.from({ length: 10 }, async () => {
+      const instructor = faker.helpers.arrayElement(instructors);
       const course = await prisma.course.create({
         data: {
           title: faker.lorem.words(3),
           description: faker.lorem.paragraph(),
           price: parseFloat(faker.commerce.price()),
-          instructorId: instructorProfile.id,
+          instructorId: instructor.id,
           categoryId: faker.helpers.arrayElement(categories).id,
         },
       });
 
       // Add Lessons
       await Promise.all(
-        Array.from({ length: 10 }, () =>
+        Array.from({ length: 5 }, () =>
           prisma.lesson.create({
             data: {
               title: faker.lorem.words(4),
@@ -109,13 +111,13 @@ async function main() {
     students.flatMap((student) => {
       const enrolledCourses = faker.helpers.arrayElements(courses, {
         min: 2,
-        max: 3,
+        max: 4,
       });
 
       return enrolledCourses.map((course) =>
         prisma.enrollment.create({
           data: {
-            userId: student.id,
+            studentId: student.id,
             courseId: course.id,
           },
         })
@@ -134,7 +136,7 @@ async function main() {
       return wishlistCourses.map((course) =>
         prisma.wishlist.create({
           data: {
-            userId: student.id,
+            studentId: student.id,
             courseId: course.id,
           },
         })
@@ -149,6 +151,6 @@ main()
     return prisma.$disconnect();
   })
   .catch((e) => {
-    console.error('❌ Seed failed:', e);
+    console.error(' Seed failed:', e);
     return prisma.$disconnect();
   });

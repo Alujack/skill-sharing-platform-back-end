@@ -15,7 +15,6 @@ const createUser = async (userData) => {
     },
     select: {
       id: true,
-      name: true,
       email: true,
       role: true,
       createdAt: true,
@@ -28,7 +27,6 @@ const getUserById = async (userId) => {
     where: { id: userId },
     select: {
       id: true,
-      name: true,
       email: true,
       role: true,
       createdAt: true,

@@ -23,7 +23,7 @@ const app = express();
 // Middlewares
 app.use(helmet());
 app.use(cors({
-  origin: 'http://localhost:3001'
+  origin: ['http://localhost:3001', 'http://localhost:3000']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,7 +38,7 @@ app.use('/v1/instructor', instructorRoutes);
 app.use('/v1/student', studentRoutes);
 app.use('/v1/admin', adminRoutes);
 app.use('/v1/users', userRoutes);
-app.use('/v1/dashboard',adminDashboardRoutes);
+app.use('/v1/dashboard', adminDashboardRoutes);
 
 
 // 404 handler

@@ -7,34 +7,43 @@ const prisma = require('../prisma');
  */
 const getAllStudents = async (req, res) => {
   try {
-    const students = await prisma.user.findMany({
-      where: {
-        role: 'Student'
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        isVerified: true,
-        createdAt: true,
+    const students = await prisma.student.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            isVerified: true,
+            createdAt: true,
+          },
+        },
         enrollments: {
           select: {
             course: {
               select: {
                 id: true,
-                title: true
-              }
-            }
-          }
-        }
-      }
+                title: true,
+              },
+            },
+          },
+        },
+      },
     });
+
+    const formatted = students.map((student) => ({
+      id: student.id,
+      name: student.name,
+      phone: student.phone,
+      email: student.user.email,
+      isVerified: student.user.isVerified,
+      createdAt: student.user.createdAt,
+      enrollments: student.enrollments,
+    }));
 
     res.status(200).json({
       success: true,
       count: students.length,
-      data: students
+      data: formatted,
     });
   } catch (error) {
     console.error(error);
@@ -49,18 +58,18 @@ const getAllStudents = async (req, res) => {
  */
 const getStudent = async (req, res) => {
   try {
-    const student = await prisma.user.findUnique({
+    const student = await prisma.student.findUnique({
       where: {
         id: parseInt(req.params.id),
-        role: 'Student'
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        isVerified: true,
-        createdAt: true,
+      include: {
+        user: {
+          select: {
+            email: true,
+            isVerified: true,
+            createdAt: true,
+          },
+        },
         enrollments: {
           select: {
             course: {
@@ -73,26 +82,26 @@ const getStudent = async (req, res) => {
                   select: {
                     user: {
                       select: {
-                        name: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
         wishlists: {
           select: {
             course: {
               select: {
                 id: true,
-                title: true
-              }
-            }
-          }
-        }
-      }
+                title: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!student) {
@@ -101,7 +110,16 @@ const getStudent = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: student
+      data: {
+        id: student.id,
+        name: student.name,
+        phone: student.phone,
+        email: student.user.email,
+        isVerified: student.user.isVerified,
+        createdAt: student.user.createdAt,
+        enrollments: student.enrollments,
+        wishlists: student.wishlists,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -118,37 +136,38 @@ const createStudent = async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    });
+    const existingUser = await prisma.user.findUnique({ where: { email } });
 
     if (existingUser) {
       return res.status(400).json({ success: false, error: 'User already exists' });
     }
 
-    const student = await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
-        name,
         email,
-        password, // In a real app, you should hash the password first
+        password, // Hashing recommended in production
         role: 'Student',
-        phone,
-        isVerified: false
+        isVerified: false,
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,
-        createdAt: true
-      }
+    });
+
+    const student = await prisma.student.create({
+      data: {
+        userId: user.id,
+        name,
+        phone,
+      },
     });
 
     res.status(201).json({
       success: true,
-      data: student
+      data: {
+        id: student.id,
+        name: student.name,
+        phone: student.phone,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -165,40 +184,37 @@ const updateStudent = async (req, res) => {
   try {
     const { name, phone, isVerified } = req.body;
 
-    // Check if student exists
-    const existingStudent = await prisma.user.findUnique({
-      where: {
-        id: parseInt(req.params.id),
-        role: 'Student'
-      }
+    const student = await prisma.student.findUnique({
+      where: { id: parseInt(req.params.id) },
+      include: { user: true },
     });
 
-    if (!existingStudent) {
+    if (!student) {
       return res.status(404).json({ success: false, error: 'Student not found' });
     }
 
-    const updatedStudent = await prisma.user.update({
-      where: {
-        id: parseInt(req.params.id)
+    const updatedStudent = await prisma.student.update({
+      where: { id: student.id },
+      data: { name, phone },
+      include: {
+        user: true,
       },
-      data: {
-        name,
-        phone,
-        isVerified
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        isVerified: true,
-        updatedAt: true
-      }
+    });
+
+    await prisma.user.update({
+      where: { id: student.userId },
+      data: { isVerified },
     });
 
     res.status(200).json({
       success: true,
-      data: updatedStudent
+      data: {
+        id: updatedStudent.id,
+        name: updatedStudent.name,
+        phone: updatedStudent.phone,
+        email: updatedStudent.user.email,
+        isVerified,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -213,36 +229,31 @@ const updateStudent = async (req, res) => {
  */
 const deleteStudent = async (req, res) => {
   try {
-    // Check if student exists
-    const existingStudent = await prisma.user.findUnique({
-      where: {
-        id: parseInt(req.params.id),
-        role: 'Student'
-      }
+    const student = await prisma.student.findUnique({
+      where: { id: parseInt(req.params.id) },
     });
 
-    if (!existingStudent) {
+    if (!student) {
       return res.status(404).json({ success: false, error: 'Student not found' });
     }
 
-    // First delete related records (enrollments and wishlists)
     await prisma.enrollment.deleteMany({
-      where: { userId: parseInt(req.params.id) }
+      where: { studentId: student.id },
     });
 
     await prisma.wishlist.deleteMany({
-      where: { userId: parseInt(req.params.id) }
+      where: { studentId: student.id },
     });
 
-    // Then delete the student
+    await prisma.student.delete({
+      where: { id: student.id },
+    });
+
     await prisma.user.delete({
-      where: { id: parseInt(req.params.id) }
+      where: { id: student.userId },
     });
 
-    res.status(200).json({
-      success: true,
-      data: {}
-    });
+    res.status(200).json({ success: true, data: {} });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Server Error' });
@@ -254,5 +265,5 @@ module.exports = {
   getStudent,
   createStudent,
   updateStudent,
-  deleteStudent
+  deleteStudent,
 };

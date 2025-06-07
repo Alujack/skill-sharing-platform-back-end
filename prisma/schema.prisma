@@ -9,17 +9,14 @@ datasource db {
 
 model User {
   id         Int      @id @default(autoincrement())
-  name       String
   email      String   @unique
   password   String
   role       UserRole @default(User)
-  phone      String?
   isVerified Boolean  @default(false)
   createdAt  DateTime @default(now())
 
-  instructorProfile InstructorProfile?
-  enrollments      Enrollment[]
-  wishlists        Wishlist[]
+  student    Student?
+  instructor Instructor?
 }
 
 enum UserRole {
@@ -29,11 +26,27 @@ enum UserRole {
   Student
 }
 
-model InstructorProfile {
+
+model Student {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @unique
+  name      String
+  phone     String?
+  createdAt DateTime @default(now())
+
+  user        User       @relation(fields: [userId], references: [id])
+  enrollments Enrollment[]
+  wishlists   Wishlist[]
+}
+
+model Instructor {
   id         Int     @id @default(autoincrement())
   userId     Int     @unique
+  name       String
   bio        String?
+  phone      String?
   isApproved Boolean @default(false)
+  createdAt  DateTime @default(now())
 
   user     User    @relation(fields: [userId], references: [id])
   courses  Course[]
@@ -48,8 +61,8 @@ model Course {
   categoryId   Int
   createdAt    DateTime @default(now())
 
-  instructor   InstructorProfile @relation(fields: [instructorId], references: [id])
-  category     Category          @relation(fields: [categoryId], references: [id])
+  instructor   Instructor @relation(fields: [instructorId], references: [id])
+  category     Category   @relation(fields: [categoryId], references: [id])
   lessons      Lesson[]
   enrollments  Enrollment[]
   wishlists    Wishlist[]
@@ -72,23 +85,17 @@ model Lesson {
 
 model Enrollment {
   id        Int      @id @default(autoincrement())
-  userId    Int
   courseId  Int
-  createdAt DateTime @default(now())
-
-  user   User   @relation(fields: [userId], references: [id])
-  course Course @relation(fields: [courseId], references: [id])
-
-  @@unique([userId, courseId])
+  studentId Int?     
+  student   Student?  @relation(fields: [studentId], references: [id])
+  course    Course    @relation(fields: [courseId], references: [id])
 }
 
 model Wishlist {
-  id       Int @id @default(autoincrement())
-  userId   Int
-  courseId Int
-
-  user   User   @relation(fields: [userId], references: [id])
-  course Course @relation(fields: [courseId], references: [id])
-
-  @@unique([userId, courseId])
+  id        Int      @id @default(autoincrement())
+  courseId  Int
+  studentId Int?    
+  student   Student?  @relation(fields: [studentId], references: [id])
+  course    Course    @relation(fields: [courseId], references: [id])
 }
+

@@ -5,7 +5,7 @@ const { generateToken } = require('../utils/jwt');
 
 const loginWithEmailAndPassword = async (email, password) => {
   const user = await prisma.user.findUnique({ where: { email } });
-  
+
   if (!user) {
     throw new Error('Incorrect email or password');
   }
@@ -16,8 +16,8 @@ const loginWithEmailAndPassword = async (email, password) => {
   }
 
   const token = generateToken(user.id);
-  
-  return { 
+
+  return {
     user: {
       id: user.id,
       name: user.name,
@@ -25,17 +25,15 @@ const loginWithEmailAndPassword = async (email, password) => {
       role: user.role,
       createdAt: user.createdAt
     },
-    token 
+    token
   };
 };
 
 const getMe = async (userId) => {
-  console.log("getMe == ",userId)
   return prisma.user.findUnique({
     where: { id: userId },
     select: {
       id: true,
-      name: true,
       email: true,
       role: true,
       createdAt: true,

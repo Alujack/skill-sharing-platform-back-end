@@ -8,17 +8,13 @@ exports.getDashboardCounts = async (req, res) => {
         const totalUsers = await prisma.user.count();
         
         // Get total students (users with Student role)
-        const totalStudents = await prisma.user.count({
-            where: { role: 'Student' }
-        });
+        const totalStudents = await prisma.Student.count();
         
         // Get total instructors (users with Instructor role)
-        const totalInstructors = await prisma.user.count({
-            where: { role: 'Instructor' }
-        });
+        const totalInstructors = await prisma.Instructor.count();
         
         // Get total approved instructors
-        const totalApprovedInstructors = await prisma.instructorProfile.count({
+        const totalApprovedInstructors = await prisma.Instructor.count({
             where: { isApproved: true }
         });
         
