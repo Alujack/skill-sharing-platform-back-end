@@ -4,7 +4,10 @@ const {
     getInstructorStudents,
     approveInstructorProfile,
     getInstructorCourses,
-    becomeToInstrutor
+    becomeToInstrutor,
+    getPendingInstructors,
+    getApprovedInstructors,
+    getAllInstructors
 
 } = require('../controllers/instructor.controller');
 const { auth, authorizeRoles } = require('../middlewares/auth.middleware');
@@ -18,11 +21,15 @@ router.get('/dashboard', getInstructorDashboard);
 router.get('/students', getInstructorStudents);
 
 // Admin approves an Instructor
-router.put('/approve/:userId', approveInstructorProfile);
+router.put('/approve', approveInstructorProfile);
 
 // Get all courses by Instructor (Public)
 router.get('/:id/courses', getInstructorCourses);
-// Become an Instructor (Protected)
+// Become an Instructor (Public)
 router.post('/become-instructor', becomeToInstrutor)
+
+router.get('/pending', getPendingInstructors)
+router.get('/approved', getApprovedInstructors)
+router.get('/all', getAllInstructors);
 
 module.exports = router;

@@ -1,97 +1,118 @@
 const prisma = require('../prisma');
-const ApiError = require('../utils/apiError');
 
-class CourseService {
-  async createCourse(instructorId, courseData) {
-    return await prisma.course.create({
-      data: {
-        ...courseData,
-        instructorId
-      },
-      include: {
-        category: true,
-        instructor: {
-          select: {
-            user: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
-          }
-        }
+const getAllCourses = async (search, filters = {}) => {
+  const { categoryId, isApproved, instructorId } = filters;
+  console.log('getAllCourses called with:', { search, categoryId, isApproved, instructorId });
+
+  // Build where conditions
+  const where = {};
+
+  const conditions = [];
+
+  if (search) {
+    conditions.push({
+      title: {
+        contains: search,
+        mode: 'insensitive',
       }
     });
   }
 
-  async getCourseById(courseId) {
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-      include: {
-        category: true,
-        instructor: {
-          select: {
-            user: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
-          }
-        },
-        lessons: true
-      }
-    });
-
-    if (!course) throw new ApiError(404, 'Course not found');
-    return course;
-  }
-
-  async updateCourse(courseId, instructorId, updateData) {
-    const course = await prisma.course.findFirst({
-      where: { id: courseId, instructorId }
-    });
-
-    if (!course) throw new ApiError(403, 'Not authorized or course not found');
-
-    return await prisma.course.update({
-      where: { id: courseId },
-      data: updateData,
-      include: { category: true }
+  if (categoryId) {
+    conditions.push({
+      categoryId: parseInt(categoryId)
     });
   }
 
-  async deleteCourse(courseId, instructorId) {
-    const course = await prisma.course.findFirst({
-      where: { id: courseId, instructorId }
-    });
-
-    if (!course) throw new ApiError(403, 'Not authorized or course not found');
-
-    await prisma.course.delete({ where: { id: courseId } });
-    return { success: true };
-  }
-
-  async listCourses(filters = {}) {
-    return await prisma.course.findMany({
-      where: filters,
-      include: {
-        category: true,
-        instructor: {
-          select: {
-            user: {
-              select: {
-                name: true
-              }
-            }
-          }
-        },
-        _count: {
-          select: { lessons: true, enrollments: true }
-        }
-      }
+  // isApproved might be a string from query param, so check and convert
+  if (typeof isApproved === 'string' && isApproved !== '') {
+    conditions.push({
+      isApproved: isApproved === 'true'
     });
   }
-}
 
-module.exports = new CourseService();
+  if (instructorId) {
+    conditions.push({
+      instructorId: parseInt(instructorId)
+    });
+  }
+
+  if (conditions.length > 0) {
+    where.AND = conditions;
+  }
+
+  return prisma.course.findMany({
+    where,
+    include: {
+      category: true,
+      instructor: true, // change to true if your frontend expects instructor.name directly
+      // if you want user under instructor, change accordingly and update frontend
+    },
+  });
+};
+
+
+const getCourseById = async (id) => {
+  return prisma.course.findUnique({
+    where: { id: parseInt(id) },
+    include: {
+      category: true,
+      instructor: { include: { user: true } },
+      lessons: true,
+    },
+  });
+};
+
+const getInstructorCourses = async (userId) => {
+  const instructor = await prisma.instructorProfile.findUnique({ where: { userId } });
+  if (!instructor) return null;
+
+  return prisma.course.findMany({
+    where: { instructorId: instructor.id },
+    include: { category: true },
+  });
+};
+
+const createCourse = async (userId, data) => {
+  const instructor = await prisma.instructorProfile.findUnique({ where: { userId } });
+  if (!instructor) return null;
+
+  return prisma.course.create({
+    data: {
+      ...data,
+      instructorId: instructor.id,
+    },
+  });
+};
+
+const updateCourse = async (userId, courseId, data) => {
+  const instructor = await prisma.instructorProfile.findUnique({ where: { userId } });
+  if (!instructor) return { error: 'NotInstructor' };
+
+  const course = await prisma.course.findUnique({ where: { id: courseId } });
+  if (!course || course.instructorId !== instructor.id) return { error: 'Unauthorized' };
+
+  return prisma.course.update({
+    where: { id: courseId },
+    data,
+  });
+};
+
+const deleteCourse = async (userId, courseId) => {
+  const instructor = await prisma.instructorProfile.findUnique({ where: { userId } });
+  const course = await prisma.course.findUnique({ where: { id: courseId } });
+
+  if (!course || course.instructorId !== instructor?.id) return false;
+
+  await prisma.course.delete({ where: { id: courseId } });
+  return true;
+};
+
+module.exports = {
+  getAllCourses,
+  getCourseById,
+  getInstructorCourses,
+  createCourse,
+  updateCourse,
+  deleteCourse,
+};

@@ -21,7 +21,7 @@ const getInstructorDashboard = async (req, res) => {
 const getInstructorStudents = async (req, res) => {
   try {
     const { instructorId } = req.query;
-    console.log(`Fetching students for instructor ID: ${instructorId}`); 
+    console.log(`Fetching students for instructor ID: ${instructorId}`);
 
     if (!instructorId) {
       return res.status(400).json({ message: 'Instructor ID is required' });
@@ -37,13 +37,9 @@ const getInstructorStudents = async (req, res) => {
 // POST /admin/instructors/:userId/approve
 const approveInstructorProfile = async (req, res) => {
   try {
-    const { instructorId } = req.query; 
+    const { userId } = req.query;
 
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID is required' });
-    }
-
-    const approvedInstructor = await InstructorService.approveInstructor(instructorId);
+    const approvedInstructor = await InstructorService.approveInstructor(userId);
     res.status(200).json(approvedInstructor);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message });
@@ -66,23 +62,54 @@ const getInstructorCourses = async (req, res) => {
 };
 const becomeToInstrutor = async (req, res) => {
   try {
-    const { userId } = req.query; // get from query as you requested
+    const { userId } = req.query;
     console.log(`User ID: ${userId}`);
-    if (!userId) {  
+    if (!userId) {
       return res.status(400).json({ message: 'User ID is required' });
-    }   
-    const instructor = await InstructorService.becomeToInstrutor(userId);
+    }
+    const instructor = await InstructorService.becomeToInstrutor(userId, req.body);
     res.status(200).json(instructor);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message });
   }
 };
-//
+
+const getPendingInstructors = async (req, res) => {
+  try {
+    const pendingInstructors = await InstructorService.getPendingInstructors();
+    res.status(200).json({ success: true, data: pendingInstructors });
+  } catch (error) {
+    console.error('Error fetching pending instructors:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+const getApprovedInstructors = async (req, res) => {
+  try {
+    const pendingInstructors = await InstructorService.getApprocedInstructors();
+    res.status(200).json({ success: true, data: pendingInstructors });
+  } catch (error) {
+    console.error('Error fetching pending instructors:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+const getAllInstructors = async (req, res) => {
+  try { 
+    const allInstructors = await InstructorService.getAllInstructors();
+    res.status(200).json({ success: true, data: allInstructors });
+  } catch (error) {
+    console.error('Error fetching all instructors:', error);    
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
 
 module.exports = {
   getInstructorDashboard,
   getInstructorStudents,
   approveInstructorProfile,
   getInstructorCourses,
-  becomeToInstrutor
+  becomeToInstrutor,
+  getPendingInstructors,
+  getApprovedInstructors,
+  getAllInstructors
 };

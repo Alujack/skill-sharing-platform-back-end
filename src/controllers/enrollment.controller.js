@@ -31,7 +31,7 @@ exports.getEnrollmentById = async (req, res) => {
       where: { id },
       include: {
         course: true,
-        user: true,
+        student: true,
       },
     });
 

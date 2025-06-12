@@ -62,6 +62,7 @@ const getStudents = async (instructorId) => {
 
 
 const approveInstructor = async (userId) => {
+  console.log("approving instructor with userId:", userId);
   const userIdInt = parseInt(userId, 10);
   if (isNaN(userIdInt)) {
     throw new Error('Invalid user ID');
@@ -85,7 +86,7 @@ const approveInstructor = async (userId) => {
   return updatedInstructor;
 };
 
-const becomeToInstrutor = async (userId) => {
+const becomeToInstrutor = async (userId, data) => {
   const userIdInt = parseInt(userId, 10);
   if (isNaN(userIdInt)) {
     throw new Error('Invalid user ID');
@@ -104,17 +105,66 @@ const becomeToInstrutor = async (userId) => {
   const instructor = await prisma.instructor.create({
     data: {
       userId: userIdInt,
-      isApproved: false, // Initially not approved
+      isApproved: false,
+      name: data.name,
+      phone: data.phone,
+      bio: data.bio,
+    },
+  });
+
+  // Update user role
+  await prisma.user.update({
+    where: { id: userIdInt },
+    data: {
+      role: 'Instructor',
     },
   });
 
   return instructor;
 };
+const getPendingInstructors = async () => {
+  const pendingInstructors = await prisma.instructor.findMany({
+    where: {
+      isApproved: false,
+    },
+    include: {
+      user: true, // Optional: include user details related to each instructor
+    },
+  });
+
+  return pendingInstructors;
+};
+const getApprocedInstructors = async () => {
+  const pendingInstructors = await prisma.instructor.findMany({
+    where: {
+      isApproved: true,
+    },
+    include: {
+      user: true, // Optional: include user details related to each instructor
+    },
+  });
+
+  return pendingInstructors;
+};
+const getAllInstructors = async () => {
+  const allInstructors = await prisma.instructor.findMany({
+    include: {
+      user: true,
+    },
+  });
+
+  return allInstructors;
+};
+
+
 
 
 module.exports = {
   getDashboardStats,
   getStudents,
   approveInstructor,
-  becomeToInstrutor
+  becomeToInstrutor,
+  getPendingInstructors,
+  getApprocedInstructors,
+  getAllInstructors
 };

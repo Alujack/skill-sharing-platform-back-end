@@ -28,7 +28,7 @@ router.post(
   controller.enrollInCourse
 );
 
-router.get('/:id', requireAuth, controller.getEnrollmentById);
+router.get('/:id', controller.getEnrollmentById);
 router.get('/:id', requireAuth, controller.getUserEnrollments);
 router.get('/course/:id', requireAuth, controller.getCourseEnrollments);
 

@@ -15,6 +15,7 @@ const studentRoutes = require('./routes/student.routes');
 const adminRoutes = require('./routes/admin.routes');
 const userRoutes = require('./routes/user.routes')
 const adminDashboardRoutes = require('./routes/admin.dashboard.route')
+const categoryRoutes = require('./routes/category.routes');
 
 
 
@@ -39,6 +40,7 @@ app.use('/v1/student', studentRoutes);
 app.use('/v1/admin', adminRoutes);
 app.use('/v1/users', userRoutes);
 app.use('/v1/dashboard', adminDashboardRoutes);
+app.use('/v1/categories', categoryRoutes);
 
 
 // 404 handler
