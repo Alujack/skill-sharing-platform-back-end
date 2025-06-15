@@ -64,7 +64,8 @@ const getCourseById = async (id) => {
 };
 
 const getInstructorCourses = async (userId) => {
-  const instructor = await prisma.instructorProfile.findUnique({ where: { userId } });
+  const instructor = await prisma.instructor.findUnique({ where: { userId } });
+  console.log( 'instructor:', instructor);
   if (!instructor) return null;
 
   return prisma.course.findMany({
@@ -74,7 +75,7 @@ const getInstructorCourses = async (userId) => {
 };
 
 const createCourse = async (userId, data) => {
-  const instructor = await prisma.instructorProfile.findUnique({ where: { userId } });
+  const instructor = await prisma.instructor.findUnique({ where: { userId } });
   if (!instructor) return null;
 
   return prisma.course.create({

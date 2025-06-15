@@ -27,8 +27,7 @@ const getStudents = async (instructorId) => {
   const instructorIdInt = parseInt(instructorId, 10);
   if (isNaN(instructorIdInt)) throw new Error('Invalid instructor ID');
 
-  // Find all enrollments where course belongs to instructor,
-  // and include the student and their user info (for email)
+  // Find all enrollments where course belongs to instructor
   const enrollments = await prisma.enrollment.findMany({
     where: {
       course: {
@@ -41,7 +40,7 @@ const getStudents = async (instructorId) => {
           id: true,
           name: true,
           phone: true,
-          user: {           // fetch the related User record for email
+          user: {
             select: {
               email: true,
             },
@@ -49,15 +48,18 @@ const getStudents = async (instructorId) => {
         },
       },
     },
+    distinct: ['studentId'], // This ensures only unique students
   });
 
-  // Map to get the student info including email from user
-  return enrollments.map((enrollment) => ({
+  // Map the results to flatten the structure
+  const uniqueStudents = enrollments.map(enrollment => ({
     id: enrollment.student.id,
     name: enrollment.student.name,
     phone: enrollment.student.phone,
-    email: enrollment.student.user.email,
+    email: enrollment.student.user.email, // Access nested user email
   }));
+
+  return uniqueStudents;
 };
 
 

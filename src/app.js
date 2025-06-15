@@ -16,6 +16,8 @@ const adminRoutes = require('./routes/admin.routes');
 const userRoutes = require('./routes/user.routes')
 const adminDashboardRoutes = require('./routes/admin.dashboard.route')
 const categoryRoutes = require('./routes/category.routes');
+// const lessonRoutes = require('./routes/lesson.route');
+// const { lesson } = require('./prisma');
 
 
 
@@ -41,6 +43,7 @@ app.use('/v1/admin', adminRoutes);
 app.use('/v1/users', userRoutes);
 app.use('/v1/dashboard', adminDashboardRoutes);
 app.use('/v1/categories', categoryRoutes);
+app.use('/v1/lesson',lessonRoutes); 
 
 
 // 404 handler

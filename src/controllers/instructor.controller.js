@@ -1,5 +1,6 @@
 const InstructorService = require('../services/instructor.service');
 const CourseService = require('../services/course.service');
+const { number } = require('joi');
 
 // GET /instructors/dashboard?instructorId=...
 const getInstructorDashboard = async (req, res) => {
@@ -54,7 +55,7 @@ const getInstructorCourses = async (req, res) => {
       return res.status(400).json({ message: 'Instructor ID is required' });
     }
 
-    const courses = await CourseService.getCoursesByInstructor(id);
+    const courses = await CourseService.getInstructorCourses(Number(id));
     res.status(200).json(courses);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message });
@@ -94,11 +95,11 @@ const getApprovedInstructors = async (req, res) => {
   }
 };
 const getAllInstructors = async (req, res) => {
-  try { 
+  try {
     const allInstructors = await InstructorService.getAllInstructors();
     res.status(200).json({ success: true, data: allInstructors });
   } catch (error) {
-    console.error('Error fetching all instructors:', error);    
+    console.error('Error fetching all instructors:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 }
