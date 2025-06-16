@@ -9,9 +9,11 @@ const getAllLessons = async (req, res) => {
     }
 }
 const getLessonByCourse = async (req, res) => {
+
     const { courseId } = req.params;
+    console.log(courseId);
     try {
-        const lessons = await service.getLessonByCourse(courseId);
+        const lessons = await service.getLessonByCourse(Number(courseId));
         if (lessons.length === 0) {
             return res.status(404).json({ message: 'No lessons found for this course' });
         }
@@ -23,7 +25,7 @@ const getLessonByCourse = async (req, res) => {
 const getLessonById = async (req, res) => {
     const { lessonId } = req.params;
     try {
-        const lesson = await service.getLessonById(lessonId);
+        const lesson = await service.getLessonById(Number(lessonId));
         if (!lesson) {
             return res.status(404).json({ message: 'Lesson not found' });
         }
@@ -34,9 +36,9 @@ const getLessonById = async (req, res) => {
     }
 }
 const createLesson = async (req, res) => {
-    const { title, content, courseId } = req.body;
+    const { title, videoUrl, courseId } = req.body;
     try {
-        const newLesson = await service.createLesson({ title, content, courseId });
+        const newLesson = await service.createLesson({ title, videoUrl, courseId });
         res.status(201).json(newLesson);
     } catch (error) {
         res.status(500).json({ message: 'Error creating lesson', error });
@@ -46,7 +48,7 @@ const updateLesson = async (req, res) => {
     const { lessonId } = req.params;
     const { title, content } = req.body;
     try {
-        const updatedLesson = await service.updateLesson(lessonId, { title, content });
+        const updatedLesson = await service.updateLesson(Number(lessonId), { title, content });
         if (!updatedLesson) {
             return res.status(404).json({ message: 'Lesson not found' });
         }
@@ -58,7 +60,7 @@ const updateLesson = async (req, res) => {
 const deleteLesson = async (req, res) => {
     const { lessonId } = req.params;
     try {
-        const deletedLesson = await service.deleteLesson(lessonId);
+        const deletedLesson = await service.deleteLesson(Number(lessonId));
         if (!deletedLesson) {
             return res.status(404).json({ message: 'Lesson not found' });
         }
