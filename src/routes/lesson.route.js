@@ -1,11 +1,9 @@
-// const express = require('express');
-// const router = express.Router();
-// const {getalllesson, getLessonbyCourse }= require('../controllers/lessons.controller');
-// const { login, logout, getCurrentUser } = require('../controllers/auth.controller');
-// const auth = require('../middlewares/auth.middleware');
+const express = require('express');
+const router = express.Router();
+const {getAllLessons, getLessonbyCourse }= require('../controllers/lessons.controller');
 
-// router.get('/', );
+router.get('/',getAllLessons );
 // router.post('/', login);
 // router.post('/logout', logout);
 // router.get('/me', auth(), getCurrentUser);
-// module.exports = router;
+module.exports = router;
