@@ -12,7 +12,7 @@ router.get('/course/:courseId', lessonController.getLessonByCourse);
 router.get('/:lessonId', lessonController.getLessonById);
 
 // Create a new lesson
-router.post('/', lessonController.createLesson);
+router.post('/create', lessonController.createLesson);
 
 // Update a lesson
 router.put('/:lessonId', lessonController.updateLesson);

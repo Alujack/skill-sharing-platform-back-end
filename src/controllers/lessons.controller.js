@@ -37,11 +37,26 @@ const getLessonById = async (req, res) => {
 }
 const createLesson = async (req, res) => {
     const { title, videoUrl, courseId } = req.body;
+    console.log(req.body)
+    
+    // Add validation
+    if (!title || !videoUrl || !courseId) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+    
+    const courseIdnew = Number(courseId);
+    
+    // Check if courseId is valid
+    if (isNaN(courseIdnew)) {
+        return res.status(400).json({ message: 'Invalid courseId' });
+    }
+    
     try {
-        const newLesson = await service.createLesson({ title, videoUrl, courseId });
+        const newLesson = await service.createLesson(req.body);
         res.status(201).json(newLesson);
     } catch (error) {
-        res.status(500).json({ message: 'Error creating lesson', error });
+        console.error('Create lesson error:', error); // Add this for debugging
+        res.status(500).json({ message: 'Error creating lesson', error: error.message });
     }
 }
 const updateLesson = async (req, res) => {
