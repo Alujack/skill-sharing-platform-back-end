@@ -80,7 +80,7 @@ model Lesson {
   videoUrl String
   courseId Int
 
-  course Course @relation(fields: [courseId], references: [id])
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model Enrollment {
@@ -88,7 +88,7 @@ model Enrollment {
   courseId  Int
   studentId Int?     
   student   Student?  @relation(fields: [studentId], references: [id])
-  course    Course    @relation(fields: [courseId], references: [id])
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model Wishlist {
@@ -96,6 +96,6 @@ model Wishlist {
   courseId  Int
   studentId Int?    
   student   Student?  @relation(fields: [studentId], references: [id])
-  course    Course    @relation(fields: [courseId], references: [id])
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 

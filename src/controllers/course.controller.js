@@ -1,3 +1,4 @@
+const { instructor } = require('../prisma');
 const courseService = require('../services/course.service');
 
 exports.getAllCourses = async (req, res) => {
@@ -45,10 +46,11 @@ exports.createCourse = async (req, res) => {
       title: req.body.title,
       description: req.body.description,
       price: req.body.price,
-      categoryId: req.body.category_id,
+      categoryId: req.body.categoryId,
+      instructorId: req.body.instructorId
     };
 
-    const course = await courseService.createCourse(req.user.id, data);
+    const course = await courseService.createCourse(req.body.instructorId, data);
     if (!course) return res.status(403).json({ message: 'Not an instructor' });
 
     res.status(201).json(course);
@@ -67,11 +69,7 @@ exports.updateCourse = async (req, res) => {
       categoryId: req.body.category_id,
     };
 
-    const result = await courseService.updateCourse(req.user.id, courseId, data);
-
-    if (result?.error === 'NotInstructor') return res.status(403).json({ message: 'Not an instructor' });
-    if (result?.error === 'Unauthorized') return res.status(403).json({ message: 'Not your course' });
-
+    const result = await courseService.updateCourse(courseId, data);
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update course', details: err.message });
@@ -81,7 +79,7 @@ exports.updateCourse = async (req, res) => {
 exports.deleteCourse = async (req, res) => {
   try {
     const courseId = parseInt(req.params.id);
-    const success = await courseService.deleteCourse(req.user.id, courseId);
+    const success = await courseService.deleteCourse(courseId);
 
     if (!success) return res.status(403).json({ message: 'Not your course' });
 

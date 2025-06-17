@@ -24,12 +24,11 @@ const courseValidation = [
 
 // Public
 router.get('/', controller.getAllCourses);
-router.get('/instructor/:id', controller.getInstructorCourses); 
+router.get('/instructor/:id', controller.getInstructorCourses);
 router.get('/:id', controller.getCourseById);
 
-// Protected (Instructor only)
-router.post('/', auth(), authorizeRoles('Instructor'), validate(courseValidation), controller.createCourse);
-router.put('/:id', auth(), authorizeRoles('Instructor'), validate(courseValidation), controller.updateCourse);
-router.delete('/:id', auth(), authorizeRoles('Instructor'), controller.deleteCourse);
+router.post('/', controller.createCourse);
+router.put('/:id', controller.updateCourse);
+router.delete('/:id', controller.deleteCourse);
 
 module.exports = router;

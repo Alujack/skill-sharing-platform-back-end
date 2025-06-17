@@ -65,7 +65,7 @@ const getCourseById = async (id) => {
 
 const getInstructorCourses = async (userId) => {
   const instructor = await prisma.instructor.findUnique({ where: { userId } });
-  console.log( 'instructor:', instructor);
+  console.log('instructor:', instructor);
   if (!instructor) return null;
 
   return prisma.course.findMany({
@@ -75,9 +75,8 @@ const getInstructorCourses = async (userId) => {
 };
 
 const createCourse = async (userId, data) => {
-  const instructor = await prisma.instructor.findUnique({ where: { userId } });
+  const instructor = await prisma.instructor.findUnique({ where: { userId: userId } });
   if (!instructor) return null;
-
   return prisma.course.create({
     data: {
       ...data,
@@ -86,12 +85,10 @@ const createCourse = async (userId, data) => {
   });
 };
 
-const updateCourse = async (userId, courseId, data) => {
-  const instructor = await prisma.instructorProfile.findUnique({ where: { userId } });
-  if (!instructor) return { error: 'NotInstructor' };
 
+const updateCourse = async (courseId, data) => {
   const course = await prisma.course.findUnique({ where: { id: courseId } });
-  if (!course || course.instructorId !== instructor.id) return { error: 'Unauthorized' };
+  if (!course) return false;
 
   return prisma.course.update({
     where: { id: courseId },
@@ -99,11 +96,12 @@ const updateCourse = async (userId, courseId, data) => {
   });
 };
 
-const deleteCourse = async (userId, courseId) => {
-  const instructor = await prisma.instructorProfile.findUnique({ where: { userId } });
+const deleteCourse = async (courseId) => {
+  console.log('course id ==', courseId)
   const course = await prisma.course.findUnique({ where: { id: courseId } });
 
-  if (!course || course.instructorId !== instructor?.id) return false;
+
+  if (!course) return false;
 
   await prisma.course.delete({ where: { id: courseId } });
   return true;
