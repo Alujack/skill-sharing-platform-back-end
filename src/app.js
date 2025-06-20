@@ -16,6 +16,7 @@ const userRoutes = require('./routes/user.routes')
 const adminDashboardRoutes = require('./routes/admin.dashboard.route')
 const categoryRoutes = require('./routes/category.routes');
 const lessonRoutes = require('./routes/lesson.route');
+const wishlistRoutes = require('./routes/whishlist.router')
 
 
 
@@ -41,6 +42,7 @@ app.use('/v1/users', userRoutes);
 app.use('/v1/dashboard', adminDashboardRoutes);
 app.use('/v1/categories', categoryRoutes);
 app.use('/v1/lesson', lessonRoutes);
+app.use('/v1/wishlist', wishlistRoutes);
 
 
 // 404 handler

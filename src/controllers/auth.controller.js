@@ -9,52 +9,26 @@ const register = async (req, res) => {
   try {
     const validatedData = await registerValidation.validateAsync(req.body);
     const user = await createUser(validatedData);
-    
+
     return res.status(201).json({
       success: true,
       data: user,
       message: 'User registered successfully'
     });
-    
-  } catch (error) {
-    if (error.isJoi) {
-      return res.status(400).json({
-        success: false,
-        message: error.details[0].message
-      });
-    }
-    
 
-    if (error.code === 'P2002') { 
-      return res.status(400).json({
-        success: false,
-        message: 'Email already exists'
-      });
-    }
-    
-    console.error('Registration error:', error);
-    return res.status(500).json({
+  } catch (error) {
+    console.error('error:', error);
+    res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      error: error.message || 'Server Error'
     });
-  }
+  };
 };
 
-const login = async (req, res, next) => {
+const login = async (req, res) => {
   try {
-    const { email, password } = await loginValidation.validateAsync(req.body);
+    const { email, password } = req.body;
     const { user, token } = await loginWithEmailAndPassword(email, password);
-    
-    // Set cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 3600000, // 1 hour
-      sameSite: 'strict'
-    });
-  
-
-    // Prepare user response without sensitive data
     const userResponse = {
       id: user.id,
       name: user.name,
@@ -62,27 +36,22 @@ const login = async (req, res, next) => {
       role: user.role,
       createdAt: user.createdAt
     };
-    const {OK} = httpStatus;
-    console.log("status code  ==",  OK)
-
-    // Send response
-    sendResponse(res, 200, { 
-      user: userResponse, 
-      token 
-    }, 'Login successful');
+    res.status(200).json({
+      success: true,
+      statusCode: 200,
+      data: {
+        user: userResponse,
+        token
+      },
+    });
 
   } catch (error) {
-    // Handle specific error cases
-    if (error.isJoi) {
-      return sendResponse(res, httpStatus.BAD_REQUEST, null, error.details[0].message);
-    }
-    
-    if (error.message === 'Incorrect email or password') {
-      return sendResponse(res, httpStatus.UNAUTHORIZED, null, 'Invalid credentials');
-    }
-
-    next(error);
-  }
+    console.error('error', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server Error'
+    });
+  };
 };
 
 const logout = (req, res) => {
@@ -100,8 +69,12 @@ const getCurrentUser = async (req, res, next) => {
       message: 'User retrieved successfully'
     });
   } catch (error) {
-    next(error);
+    console.error('error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server Error'
+    });
   }
 };
 
-module.exports = { register, login, logout, getCurrentUser };
+module.exports = { register, login, logout, getCurrentUser }; 

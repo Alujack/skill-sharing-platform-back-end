@@ -4,7 +4,7 @@ const prisma = require('./prisma');
 
 const startServer = async () => {
   try {
-   
+
     await prisma.$connect();
     console.log('Database connected');
   } catch (error) {
