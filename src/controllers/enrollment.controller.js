@@ -1,25 +1,101 @@
 const prisma = require('../prisma');
 
 exports.enrollInCourse = async (req, res) => {
-  const userId = req.user.id;
-  const { course_id } = req.body;
+  const { courseId, userId } = req.body;
+
+  if (!courseId || !userId) {
+    return res.status(400).json({ message: 'Missing courseId or userId' });
+  }
 
   try {
-    const existing = await prisma.enrollment.findUnique({
-      where: { userId_courseId: { userId, courseId: course_id } },
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
     });
 
-    if (existing) {
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    let student = await prisma.student.findUnique({
+      where: { userId: userId },
+    });
+
+    if (!student) {
+      student = await prisma.student.create({
+        data: {
+          userId: userId,
+        },
+      });
+
+      // 3. Update the User's role to "STUDENT"
+      await prisma.user.update({
+        where: { id: userId },
+        data: { role: "student" },
+      });
+      console.log(`User ${userId} role updated to STUDENT.`);
+    }
+    const studentId = student.id;
+    const existingEnrollment = await prisma.enrollment.findUnique({
+      where: {
+        studentId_courseId: {
+          studentId: studentId,
+          courseId: courseId,
+        },
+      },
+    });
+
+    if (existingEnrollment) {
       return res.status(400).json({ message: 'Already enrolled in this course' });
     }
 
-    const enrollment = await prisma.enrollment.create({
-      data: { userId, courseId: course_id },
+    // 5. Create the enrollment
+    const newEnrollment = await prisma.enrollment.create({
+      data: {
+        studentId: studentId,
+        courseId: courseId,
+      },
+      include: {
+        student: {
+          include: {
+            user: true
+          }
+        },
+        course: true,
+      }
     });
 
-    res.status(201).json(enrollment);
+    res.status(201).json(newEnrollment);
+
   } catch (err) {
+    console.error('Failed to enroll:', err);
     res.status(500).json({ error: 'Failed to enroll', details: err.message });
+  }
+};
+
+// Also update getUserEnrollments to include user details if needed for student info
+exports.getUserEnrollments = async (req, res) => {
+  const userId = parseInt(req.params.id);
+
+  try {
+    const student = await prisma.student.findUnique({
+      where: { userId: userId },
+      include: { user: true } // Include the related User data
+    });
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student profile not found for this user.' });
+    }
+
+    const enrollments = await prisma.enrollment.findMany({
+      where: { studentId: student.id },
+      include: { course: true },
+    });
+
+    // You can now access student.user.name if needed
+    res.json(enrollments);
+  } catch (err) {
+    console.error('Failed to fetch user enrollments:', err);
+    res.status(500).json({ error: 'Failed to fetch user enrollments', details: err.message });
   }
 };
 
@@ -43,32 +119,53 @@ exports.getEnrollmentById = async (req, res) => {
   }
 };
 
-exports.getUserEnrollments = async (req, res) => {
-  const userId = parseInt(req.params.id);
-
-  try {
-    const enrollments = await prisma.enrollment.findMany({
-      where: { userId },
-      include: { course: true },
-    });
-
-    res.json(enrollments);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch user enrollments', details: err.message });
-  }
-};
-
 exports.getCourseEnrollments = async (req, res) => {
   const courseId = parseInt(req.params.id);
+  console.log("Fetching course and enrolled students for courseId ==", courseId);
 
   try {
-    const enrollments = await prisma.enrollment.findMany({
-      where: { courseId },
-      include: { user: true },
+    // 1. Fetch the Course details
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
     });
 
-    res.json(enrollments);
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // 2. Fetch all enrollments for that course, including student and user details
+    const enrollments = await prisma.enrollment.findMany({
+      where: { courseId: courseId },
+      include: {
+        student: {
+          include: {
+            user: true // Include the user details nested within the student
+          }
+        },
+      },
+    });
+
+    // 3. Extract unique student objects from the enrollments
+    const enrolledStudents = [];
+    const studentIds = new Set(); // To ensure each student is added only once
+
+    for (const enrollment of enrollments) {
+      if (enrollment.student && !studentIds.has(enrollment.student.id)) {
+        enrolledStudents.push(enrollment.student);
+        studentIds.add(enrollment.student.id);
+      }
+    }
+
+    // 4. Construct the desired response object
+    const responseData = {
+      course: course,
+      students: enrolledStudents,
+    };
+
+    res.json(responseData); // Send back the structured object
+
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch course enrollments', details: err.message });
+    console.error('Failed to fetch course details and enrolled students:', err);
+    res.status(500).json({ error: 'Failed to fetch course details and enrolled students', details: err.message });
   }
 };

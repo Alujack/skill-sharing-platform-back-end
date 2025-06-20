@@ -7,8 +7,7 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
   const user = await prisma.user.findUnique({
-    where: { id: parseInt(req.params.id) },
-    include: { instructorProfile: true },
+    where: { id: parseInt(req.params.id) }
   });
   if (!user) return res.status(404).json({ message: 'User not found' });
   res.json(user);

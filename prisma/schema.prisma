@@ -30,7 +30,7 @@ enum UserRole {
 model Student {
   id        Int     @id @default(autoincrement())
   userId    Int     @unique
-  name      String
+  name      String?
   phone     String?
   createdAt DateTime @default(now())
 
@@ -89,6 +89,7 @@ model Enrollment {
   studentId Int?     
   student   Student?  @relation(fields: [studentId], references: [id])
   course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  @@unique([studentId, courseId])
 }
 
 model Wishlist {

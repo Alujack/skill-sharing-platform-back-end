@@ -38,7 +38,7 @@ const getInstructorStudents = async (req, res) => {
 // POST /admin/instructors/:userId/approve
 const approveInstructorProfile = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId } = req.body;
 
     const approvedInstructor = await InstructorService.approveInstructor(userId);
     res.status(200).json(approvedInstructor);
@@ -63,7 +63,7 @@ const getInstructorCourses = async (req, res) => {
 };
 const becomeToInstrutor = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId } = req.body;
     console.log(`User ID: ${userId}`);
     if (!userId) {
       return res.status(400).json({ message: 'User ID is required' });

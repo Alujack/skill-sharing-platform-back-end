@@ -1,0 +1,899 @@
+{
+  "info": {
+    "name": "Learning Platform API",
+    "description": "Complete API collection for testing all endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "courseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "instructorId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"Student\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.user && response.user.id) {",
+                  "        pm.collectionVariables.set('userId', response.user.id);",
+                  "    }",
+                  "    if (response.token) {",
+                  "        pm.collectionVariables.set('token', response.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.collectionVariables.set('token', response.token);",
+                  "    }",
+                  "    if (response.user && response.user.id) {",
+                  "        pm.collectionVariables.set('userId', response.user.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.updated@example.com\",\n  \"role\": \"Student\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Instructor Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Jane Smith\",\n  \"bio\": \"Experienced software developer with 10+ years in web development\",\n  \"phone\": \"+1-555-0123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/instructor",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "instructor"]
+            }
+          }
+        },
+        {
+          "name": "Update Instructor Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Jane Smith Updated\",\n  \"bio\": \"Senior software architect with expertise in full-stack development\",\n  \"phone\": \"+1-555-0124\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/instructor",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "instructor"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "Get All Students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/student",
+              "host": ["{{baseUrl}}"],
+              "path": ["student"]
+            }
+          }
+        },
+        {
+          "name": "Get Student By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/student/{{studentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "{{studentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userId}},\n  \"name\": \"John Doe\",\n  \"phone\": \"+1-555-0100\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/student",
+              "host": ["{{baseUrl}}"],
+              "path": ["student"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.id) {",
+                  "        pm.collectionVariables.set('studentId', response.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Student",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"phone\": \"+1-555-0101\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/student/{{studentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "{{studentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Student",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/student/{{studentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "{{studentId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Instructors",
+      "item": [
+        {
+          "name": "Get Instructor Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/instructor/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["instructor", "dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Get Instructor Students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/instructor/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["instructor", "students"]
+            }
+          }
+        },
+        {
+          "name": "Approve Instructor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instructorId\": {{instructorId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/instructor/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["instructor", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Get Instructor Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/instructor/{{instructorId}}/courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["instructor", "{{instructorId}}", "courses"]
+            }
+          }
+        },
+        {
+          "name": "Become Instructor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userId}},\n  \"name\": \"New Instructor\",\n  \"bio\": \"Passionate educator with industry experience\",\n  \"phone\": \"+1-555-0200\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/instructor/become-instructor",
+              "host": ["{{baseUrl}}"],
+              "path": ["instructor", "become-instructor"]
+            }
+          }
+        },
+        {
+          "name": "Get Pending Instructors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/instructor/pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["instructor", "pending"]
+            }
+          }
+        },
+        {
+          "name": "Get Approved Instructors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/instructor/approved",
+              "host": ["{{baseUrl}}"],
+              "path": ["instructor", "approved"]
+            }
+          }
+        },
+        {
+          "name": "Get All Instructors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/instructor/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["instructor", "all"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Category By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Web Development\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Full Stack Web Development\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        {
+          "name": "Get All Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses"]
+            }
+          }
+        },
+        {
+          "name": "Get Course By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{courseId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Courses By Instructor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/instructor/{{instructorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "instructor", "{{instructorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Complete React.js Course\",\n  \"description\": \"Learn React.js from basics to advanced concepts including hooks, context, and state management\",\n  \"price\": 99.99,\n  \"instructorId\": 1,\n  \"categoryId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.id) {",
+                  "        pm.collectionVariables.set('courseId', response.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Advanced React.js Course\",\n  \"description\": \"Master React.js with advanced patterns, performance optimization, and real-world projects\",\n  \"price\": 129.99\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{courseId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Course",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{courseId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lessons",
+      "item": [
+        {
+          "name": "Get All Lessons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lesson",
+              "host": ["{{baseUrl}}"],
+              "path": ["lesson"]
+            }
+          }
+        },
+        {
+          "name": "Get Lessons By Course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lesson/course/{{courseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lesson", "course", "{{courseId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Lesson By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lesson/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["lesson", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Lesson",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Introduction to React\",\n  \"videoUrl\": \"https://example.com/videos/react-intro.mp4\",\n  \"courseId\": {{courseId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lesson",
+              "host": ["{{baseUrl}}"],
+              "path": ["lesson"]
+            }
+          }
+        },
+        {
+          "name": "Update Lesson",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Advanced React Concepts\",\n  \"videoUrl\": \"https://example.com/videos/react-advanced.mp4\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lesson/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["lesson", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Lesson",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lesson/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["lesson", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enrollments",
+      "item": [
+        {
+          "name": "Enroll in Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": {{courseId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/enrollments",
+              "host": ["{{baseUrl}}"],
+              "path": ["enrollments"]
+            }
+          }
+        },
+        {
+          "name": "Get Enrollment By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/enrollments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["enrollments", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get User Enrollments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/enrollments/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["enrollments", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Course Enrollments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/enrollments/course/{{courseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["enrollments", "course", "{{courseId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Platform Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Approve Instructor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/approve-instructor/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "approve-instructor", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Dashboard Counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/counts",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "counts"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}

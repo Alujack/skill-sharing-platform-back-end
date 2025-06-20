@@ -12,7 +12,6 @@ const courseRoutes = require('./routes/course.routes');
 const enrollmentRoutes = require('./routes/enrollment.routes');
 const instructorRoutes = require('./routes/instructor.routes');
 const studentRoutes = require('./routes/student.routes');
-const adminRoutes = require('./routes/admin.routes');
 const userRoutes = require('./routes/user.routes')
 const adminDashboardRoutes = require('./routes/admin.dashboard.route')
 const categoryRoutes = require('./routes/category.routes');
@@ -25,7 +24,7 @@ const app = express();
 // Middlewares
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:3000']
+  origin: '*'
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,11 +37,10 @@ app.use('/v1/courses', courseRoutes);
 app.use('/v1/enrollments', enrollmentRoutes);
 app.use('/v1/instructor', instructorRoutes);
 app.use('/v1/student', studentRoutes);
-app.use('/v1/admin', adminRoutes);
 app.use('/v1/users', userRoutes);
 app.use('/v1/dashboard', adminDashboardRoutes);
 app.use('/v1/categories', categoryRoutes);
-app.use('/v1/lesson',lessonRoutes); 
+app.use('/v1/lesson', lessonRoutes);
 
 
 // 404 handler

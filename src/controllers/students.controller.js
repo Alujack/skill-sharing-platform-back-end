@@ -1,262 +1,262 @@
-const prisma = require('../prisma');
+const studentService = require('../services/student.service');
+const { validationResult } = require('express-validator');
 
-/**
- * @desc Get all students
- * @route GET /api/students
- * @access Private (User role)
- */
+
 const getAllStudents = async (req, res) => {
   try {
-    const students = await prisma.student.findMany({
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            isVerified: true,
-            createdAt: true,
-          },
-        },
-        enrollments: {
-          select: {
-            course: {
-              select: {
-                id: true,
-                title: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    const formatted = students.map((student) => ({
-      id: student.id,
-      name: student.name,
-      phone: student.phone,
-      email: student.user.email,
-      isVerified: student.user.isVerified,
-      createdAt: student.user.createdAt,
-      enrollments: student.enrollments,
-    }));
+    const students = await studentService.getAllStudents();
 
     res.status(200).json({
       success: true,
       count: students.length,
-      data: formatted,
+      data: students,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Server Error' });
+    console.error('Get all students error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server Error'
+    });
   }
 };
 
-/**
- * @desc Get single student
- * @route GET /api/students/:id
- * @access Private (User role)
- */
 const getStudent = async (req, res) => {
   try {
-    const student = await prisma.student.findUnique({
-      where: {
-        id: parseInt(req.params.id),
-      },
-      include: {
-        user: {
-          select: {
-            email: true,
-            isVerified: true,
-            createdAt: true,
-          },
-        },
-        enrollments: {
-          select: {
-            course: {
-              select: {
-                id: true,
-                title: true,
-                description: true,
-                price: true,
-                instructor: {
-                  select: {
-                    user: {
-                      select: {
-                        name: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        wishlists: {
-          select: {
-            course: {
-              select: {
-                id: true,
-                title: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const studentId = parseInt(req.params.id);
 
-    if (!student) {
-      return res.status(404).json({ success: false, error: 'Student not found' });
+    if (isNaN(studentId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid student ID',
+      });
     }
+
+    const student = await studentService.getStudentById(studentId);
 
     res.status(200).json({
       success: true,
-      data: {
-        id: student.id,
-        name: student.name,
-        phone: student.phone,
-        email: student.user.email,
-        isVerified: student.user.isVerified,
-        createdAt: student.user.createdAt,
-        enrollments: student.enrollments,
-        wishlists: student.wishlists,
-      },
+      data: student,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Server Error' });
+    console.error('Get student error:', error);
+
+    if (error.message === 'Student not found') {
+      return res.status(404).json({
+        success: false,
+        error: 'Student not found',
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server Error',
+    });
   }
 };
 
-/**
- * @desc Create a student
- * @route POST /api/students
- * @access Private (User role)
- */
 const createStudent = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
-
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-
-    if (existingUser) {
-      return res.status(400).json({ success: false, error: 'User already exists' });
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: errors.array(),
+      });
     }
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password, // Hashing recommended in production
-        role: 'Student',
-        isVerified: false,
-      },
-    });
+    const { name, email, password, phone } = req.body;
 
-    const student = await prisma.student.create({
-      data: {
-        userId: user.id,
-        name,
-        phone,
-      },
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name, email, and password are required',
+      });
+    }
+
+    const student = await studentService.createStudent({
+      name,
+      email,
+      password,
+      phone,
     });
 
     res.status(201).json({
       success: true,
-      data: {
-        id: student.id,
-        name: student.name,
-        phone: student.phone,
-        email: user.email,
-        createdAt: user.createdAt,
-      },
+      data: student,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Server Error' });
+    console.error('Create student error:', error);
+
+    if (error.message === 'User already exists') {
+      return res.status(400).json({
+        success: false,
+        error: 'User already exists',
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server Error',
+    });
   }
 };
 
-/**
- * @desc Update student
- * @route PUT /api/students/:id
- * @access Private (User role)
- */
 const updateStudent = async (req, res) => {
   try {
-    const { name, phone, isVerified } = req.body;
-
-    const student = await prisma.student.findUnique({
-      where: { id: parseInt(req.params.id) },
-      include: { user: true },
-    });
-
-    if (!student) {
-      return res.status(404).json({ success: false, error: 'Student not found' });
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: errors.array(),
+      });
     }
 
-    const updatedStudent = await prisma.student.update({
-      where: { id: student.id },
-      data: { name, phone },
-      include: {
-        user: true,
-      },
-    });
+    const studentId = parseInt(req.params.id);
 
-    await prisma.user.update({
-      where: { id: student.userId },
-      data: { isVerified },
+    if (isNaN(studentId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid student ID',
+      });
+    }
+
+    const { name, phone, isVerified } = req.body;
+
+    const updatedStudent = await studentService.updateStudent(studentId, {
+      name,
+      phone,
+      isVerified,
     });
 
     res.status(200).json({
       success: true,
-      data: {
-        id: updatedStudent.id,
-        name: updatedStudent.name,
-        phone: updatedStudent.phone,
-        email: updatedStudent.user.email,
-        isVerified,
-      },
+      data: updatedStudent,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Server Error' });
+    console.error('Update student error:', error);
+
+    if (error.message === 'Student not found') {
+      return res.status(404).json({
+        success: false,
+        error: 'Student not found',
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server Error',
+    });
   }
 };
 
-/**
- * @desc Delete student
- * @route DELETE /api/students/:id
- * @access Private (User role)
- */
 const deleteStudent = async (req, res) => {
   try {
-    const student = await prisma.student.findUnique({
-      where: { id: parseInt(req.params.id) },
-    });
+    const studentId = parseInt(req.params.id);
 
-    if (!student) {
-      return res.status(404).json({ success: false, error: 'Student not found' });
+    if (isNaN(studentId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid student ID',
+      });
     }
 
-    await prisma.enrollment.deleteMany({
-      where: { studentId: student.id },
-    });
+    await studentService.deleteStudent(studentId);
 
-    await prisma.wishlist.deleteMany({
-      where: { studentId: student.id },
+    res.status(200).json({
+      success: true,
+      data: {},
+      message: 'Student deleted successfully'
     });
-
-    await prisma.student.delete({
-      where: { id: student.id },
-    });
-
-    await prisma.user.delete({
-      where: { id: student.userId },
-    });
-
-    res.status(200).json({ success: true, data: {} });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Server Error' });
+    console.error('Delete student error:', error);
+
+    if (error.message === 'Student not found') {
+      return res.status(404).json({
+        success: false,
+        error: 'Student not found',
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server Error',
+    });
+  }
+};
+
+const getStudentEnrollments = async (req, res) => {
+  try {
+    const studentId = parseInt(req.params.id);
+
+    if (isNaN(studentId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid student ID',
+      });
+    }
+
+    const enrollments = await studentService.getStudentEnrollments(studentId);
+
+    res.status(200).json({
+      success: true,
+      count: enrollments.length,
+      data: enrollments,
+    });
+  } catch (error) {
+    console.error('Get student enrollments error:', error);
+
+    if (error.message === 'Student not found') {
+      return res.status(404).json({
+        success: false,
+        error: 'Student not found',
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server Error',
+    });
+  }
+};
+
+
+const getStudentWishlist = async (req, res) => {
+  try {
+    const studentId = parseInt(req.params.id);
+
+    if (isNaN(studentId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid student ID',
+      });
+    }
+
+    const wishlist = await studentService.getStudentWishlist(studentId);
+
+    res.status(200).json({
+      success: true,
+      count: wishlist.length,
+      data: wishlist,
+    });
+  } catch (error) {
+    console.error('Get student wishlist error:', error);
+
+    if (error.message === 'Student not found') {
+      return res.status(404).json({
+        success: false,
+        error: 'Student not found',
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Server Error',
+    });
   }
 };
 
@@ -266,4 +266,6 @@ module.exports = {
   createStudent,
   updateStudent,
   deleteStudent,
+  getStudentEnrollments,
+  getStudentWishlist,
 };

@@ -2,9 +2,6 @@ const prisma = require('../prisma');
 
 const getAllCourses = async (search, filters = {}) => {
   const { categoryId, isApproved, instructorId } = filters;
-  console.log('getAllCourses called with:', { search, categoryId, isApproved, instructorId });
-
-  // Build where conditions
   const where = {};
 
   const conditions = [];
@@ -23,8 +20,6 @@ const getAllCourses = async (search, filters = {}) => {
       categoryId: parseInt(categoryId)
     });
   }
-
-  // isApproved might be a string from query param, so check and convert
   if (typeof isApproved === 'string' && isApproved !== '') {
     conditions.push({
       isApproved: isApproved === 'true'
@@ -45,8 +40,7 @@ const getAllCourses = async (search, filters = {}) => {
     where,
     include: {
       category: true,
-      instructor: true, // change to true if your frontend expects instructor.name directly
-      // if you want user under instructor, change accordingly and update frontend
+      instructor: true,
     },
   });
 };
