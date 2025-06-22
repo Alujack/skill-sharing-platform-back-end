@@ -125,8 +125,8 @@ class StudentService {
   async createStudent({ name, email, password, phone }) {
     try {
       // Check if user already exists
-      const existingUser = await prisma.user.findUnique({ 
-        where: { email } 
+      const existingUser = await prisma.user.findUnique({
+        where: { email }
       });
 
       if (existingUser) {
@@ -283,10 +283,21 @@ class StudentService {
    * @param {number} studentId - Student ID
    * @returns {Promise<Array>} Student enrollments
    */
-  async getStudentEnrollments(studentId) {
+  async getStudentEnrollments(userId) {
     try {
-      const student = await prisma.student.findUnique({
-        where: { id: studentId },
+      // First find the student record associated with this user
+      const student = await prisma.student.findFirst({
+        where: {
+          userId: Number(userId)
+        },
+        select: {
+          id: true // We only need the student ID
+        }
+      });
+
+      // Now get the enrollments with all relations
+      const studentWithEnrollments = await prisma.student.findUnique({
+        where: { id: student.id },
         include: {
           enrollments: {
             include: {
@@ -308,17 +319,11 @@ class StudentService {
           },
         },
       });
-
-      if (!student) {
-        throw new Error('Student not found');
-      }
-
-      return student.enrollments;
+      return studentWithEnrollments.enrollments;
     } catch (error) {
-      throw new Error(`Failed to fetch student enrollments: ${error.message}`);
+      return [];
     }
   }
-
   /**
    * Get student wishlist
    * @param {number} studentId - Student ID

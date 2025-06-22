@@ -1,29 +1,69 @@
 const prisma = require('../prisma');
 
-exports.getWishlistByStudentId = async (studentId) => {
-  const parsedId = parseInt(studentId);
+exports.getWishlistByStudentId = async (userId) => {
+  const student = await prisma.student.findFirst({
+    where: {
+      userId: Number(userId)
+    },
+    select: {
+      id: true
+    }
+  });
+
+  if (!student) {
+    throw new Error('Student not found for this user');
+  }
   return await prisma.wishlist.findMany({
-    where: { studentId: parsedId },
-    include: { course: true, student: true }
+    where: { studentId: student.id },
+    include: { course: true }
   });
 };
 
-exports.addCourseToWishlist = async (studentId, courseId) => {
-  const parsedStudentId = parseInt(studentId);
-  const parsedCourseId = parseInt(courseId);
+exports.addCourseToWishlist = async (userId, courseId) => {
+  try {
+    const student = await prisma.student.findFirst({
+      where: {
+        userId: Number(userId)
+      },
+      select: {
+        id: true
+      }
+    });
 
-  const existing = await prisma.wishlist.findFirst({
-    where: { studentId: parsedStudentId, courseId: parsedCourseId }
-  });
+    if (!student) {
+      throw new Error('Student not found for this user');
+    }
 
-  if (existing) {
-    throw new Error('Course already in wishlist');
+    const parsedCourseId = Number(courseId);
+    const existing = await prisma.wishlist.findFirst({
+      where: {
+        studentId: student.id,
+        courseId: parsedCourseId
+      }
+    });
+
+    if (existing) {
+      throw new Error('Course already in wishlist');
+    }
+
+    return await prisma.wishlist.create({
+      data: {
+        studentId: student.id,
+        courseId: parsedCourseId
+      },
+      include: {
+        course: true,
+        student: {
+          include: {
+            user: true
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error in addCourseToWishlist:', error);
+    throw error;
   }
-
-  return await prisma.wishlist.create({
-    data: { studentId: parsedStudentId, courseId: parsedCourseId },
-    include: { course: true, student: true }
-  });
 };
 
 exports.removeWishlistItem = async (id) => {

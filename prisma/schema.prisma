@@ -59,6 +59,7 @@ model Course {
   price        Float
   instructorId Int
   categoryId   Int
+  thumbnail    String
   createdAt    DateTime @default(now())
 
   instructor   Instructor @relation(fields: [instructorId], references: [id])
@@ -89,6 +90,7 @@ model Enrollment {
   studentId Int?     
   student   Student?  @relation(fields: [studentId], references: [id])
   course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id])
   @@unique([studentId, courseId])
 }
 

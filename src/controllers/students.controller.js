@@ -204,7 +204,6 @@ const getStudentEnrollments = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      count: enrollments.length,
       data: enrollments,
     });
   } catch (error) {

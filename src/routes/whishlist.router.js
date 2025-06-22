@@ -8,15 +8,15 @@ const {
 } = require('../controllers/whishlist.controller');
 
 // Get student's wishlist
-router.get('/students/:studentId/wishlist', getWishlist);
+router.get('/students/:studentId', getWishlist);
 
 // Add to wishlist
-router.post('/students/:studentId/wishlist', addToWishlist);
+router.post('/students/:studentId', addToWishlist);
 
 // Remove from wishlist
 router.delete('/wishlist/:id', removeFromWishlist);
 
 // Clear wishlist
-router.delete('/students/:studentId/wishlist', clearWishlist);
+router.delete('/students/:studentId', clearWishlist);
 
 module.exports = router;

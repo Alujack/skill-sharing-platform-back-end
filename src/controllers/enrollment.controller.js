@@ -2,6 +2,8 @@ const prisma = require('../prisma');
 
 exports.enrollInCourse = async (req, res) => {
   const { courseId, userId } = req.body;
+  const newuser = Number(userId)
+  const newcourse = Number(courseId);
 
   if (!courseId || !userId) {
     return res.status(400).json({ message: 'Missing courseId or userId' });
@@ -9,7 +11,7 @@ exports.enrollInCourse = async (req, res) => {
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: newuser },
     });
 
     if (!user) {
@@ -17,20 +19,19 @@ exports.enrollInCourse = async (req, res) => {
     }
 
     let student = await prisma.student.findUnique({
-      where: { userId: userId },
+      where: { userId: newuser },
     });
 
     if (!student) {
       student = await prisma.student.create({
         data: {
-          userId: userId,
+          userId: newuser,
         },
       });
 
-      // 3. Update the User's role to "STUDENT"
       await prisma.user.update({
-        where: { id: userId },
-        data: { role: "student" },
+        where: { id: newuser },
+        data: { role: "Student" },
       });
       console.log(`User ${userId} role updated to STUDENT.`);
     }
@@ -39,7 +40,7 @@ exports.enrollInCourse = async (req, res) => {
       where: {
         studentId_courseId: {
           studentId: studentId,
-          courseId: courseId,
+          courseId: newcourse,
         },
       },
     });
@@ -52,7 +53,7 @@ exports.enrollInCourse = async (req, res) => {
     const newEnrollment = await prisma.enrollment.create({
       data: {
         studentId: studentId,
-        courseId: courseId,
+        courseId: newcourse,
       },
       include: {
         student: {
