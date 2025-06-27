@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getAllLessons, getLessonByCourse, getLessonById, createLesson, updateLesson, deleteLesson } = require('../controllers/lessons.controller');
+const upload = require('../middlewares/upload');
 
 // Get all lessons
 router.get('/', getAllLessons);
@@ -12,7 +13,11 @@ router.get('/course/:courseId', getLessonByCourse);
 router.get('/:lessonId', getLessonById);
 
 // Create a new lesson
-router.post('/', createLesson);
+router.post(
+    '/',
+    upload.single('video'), // 👈 handle video upload field name
+    lessonController.createLesson
+);
 
 // Update a lesson
 router.put('/:lessonId', updateLesson);

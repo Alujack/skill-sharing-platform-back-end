@@ -1,5 +1,6 @@
 const lessonService = require('../services/lesson.service');
-
+const path = require('path');
+const fs = require('fs');
 // Get all lessons
 const getAllLessons = async (req, res) => {
     try {
@@ -74,35 +75,56 @@ const getLessonById = async (req, res) => {
 
 // Create new lesson
 const createLesson = async (req, res) => {
-    const { title, videoUrl, courseId } = req.body;
-    console.log(title)
-
-    // Validation
-    if (!title || !videoUrl || !courseId) {
-        return res.status(400).json({
-            success: false,
-            message: 'Missing required fields (title, videoUrl, courseId)'
-        });
-    }
-
     try {
+        const { title, courseId } = req.body;
+        const file = req.file;
+
+        // Validation
+        if (!title || !courseId || !file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields (title, courseId, or video file)',
+            });
+        }
+
+        // 1. Create lesson without videoUrl for now
         const newLesson = await lessonService.createLesson({
             title,
-            videoUrl,
+            videoUrl: '',
             courseId: Number(courseId),
-            ...req.body
         });
+
+        const lessonId = newLesson.id;
+        const courseDir = path.join(__dirname, '..', 'videos', `course_${courseId}`);
+        const finalFileName = `lesson_${lessonId}.mp4`;
+        const finalFilePath = path.join(courseDir, finalFileName);
+
+        // 2. Create directory if not exist
+        fs.mkdirSync(courseDir, { recursive: true });
+
+        // 3. Move file to permanent location
+        fs.renameSync(file.path, finalFilePath);
+
+        // 4. Build public path for frontend (if serving statically)
+        const videoUrl = `/videos/course_${courseId}/${finalFileName}`;
+
+        // 5. Update lesson with final video URL
+        await lessonService.updateLessonVideoUrl(lessonId, videoUrl);
 
         res.status(201).json({
             success: true,
-            data: newLesson
+            message: 'Lesson created successfully',
+            data: {
+                ...newLesson,
+                videoUrl,
+            },
         });
     } catch (error) {
         console.error('[Lesson Controller] createLesson error:', error);
         res.status(500).json({
             success: false,
             message: 'Server error while creating lesson',
-            error: error.message // Only include in development
+            error: error.message,
         });
     }
 };
