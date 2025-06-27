@@ -90,7 +90,7 @@ const createLesson = async (req, res) => {
             title,
             videoUrl,
             courseId: Number(courseId),
-            ...req.body // Include any additional fields
+            ...req.body
         });
 
         res.status(201).json({

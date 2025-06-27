@@ -42,6 +42,7 @@ const getLessonByCourse = async (courseId) => {
     }
 }
 const createLesson = async (data) => {
+    console.log("data", data);
     try {
         const newLesson = await prisma.lesson.create({
             data,

@@ -19,7 +19,6 @@ exports.getAllCourses = async (req, res) => {
   }
 };
 
-
 exports.getCourseById = async (req, res) => {
   try {
     const course = await courseService.getCourseById(req.params.id);
@@ -40,6 +39,60 @@ exports.getInstructorCourses = async (req, res) => {
   }
 };
 
+exports.getRecentCourses = async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const courses = await courseService.getRecentCourses(limit);
+    res.json({
+      message: 'Recent courses fetched successfully',
+      data: courses
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch recent courses', details: err.message });
+  }
+};
+
+exports.getBestSellingCourses = async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const courses = await courseService.getBestSellingCourses(limit);
+    res.json({
+      message: 'Best selling courses fetched successfully',
+      data: courses
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch best selling courses', details: err.message });
+  }
+};
+
+exports.getRecommendedCourses = async (req, res) => {
+  try {
+    const userId = req.query.userId || null;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const courses = await courseService.getRecommendedCourses(userId, limit);
+    res.json({
+      message: 'Recommended courses fetched successfully',
+      data: courses
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch recommended courses', details: err.message });
+  }
+};
+
+exports.getCoursesByCategory = async (req, res) => {
+  try {
+    const categoryId = req.params.categoryId;
+    const limit = req.query.limit ? parseInt(req.query.limit) : null;
+    const courses = await courseService.getCoursesByCategory(categoryId, limit);
+    res.json({
+      message: 'Courses by category fetched successfully',
+      data: courses
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch courses by category', details: err.message });
+  }
+};
+
 exports.createCourse = async (req, res) => {
   try {
     const data = {
@@ -49,6 +102,7 @@ exports.createCourse = async (req, res) => {
       categoryId: req.body.categoryId,
       instructorId: req.body.instructorId
     };
+    console.log('data ==', data);
 
     const course = await courseService.createCourse(req.body.instructorId, data);
     if (!course) return res.status(403).json({ message: 'Not an instructor' });
