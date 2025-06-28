@@ -13,7 +13,7 @@ model User {
   password   String
   role       UserRole @default(User)
   createdAt  DateTime @default(now())
-  
+  isVerified Boolean  @default(false)
   student     Student?
   instructor  Instructor?
 }
@@ -32,7 +32,7 @@ model Student {
   phone     String?
   createdAt DateTime @default(now())
   
-  user        User         @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   enrollments Enrollment[]
   wishlists   Wishlist[]
 }
@@ -46,7 +46,7 @@ model Instructor {
   isApproved Boolean  @default(false)
   createdAt  DateTime @default(now())
   
-  user    User     @relation(fields: [userId], references: [id])
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   courses Course[]
 }
 
@@ -61,8 +61,8 @@ model Course {
   isApproved   Boolean  @default(false)
   createdAt    DateTime @default(now())
   
-  instructor  Instructor   @relation(fields: [instructorId], references: [id])
-  category    Category     @relation(fields: [categoryId], references: [id])
+  instructor  Instructor   @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  category    Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   lessons     Lesson[]
   enrollments Enrollment[]
   wishlists   Wishlist[]
@@ -79,8 +79,8 @@ model Lesson {
   title    String
   videoUrl String
   courseId Int
-  
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model Enrollment {
@@ -89,7 +89,7 @@ model Enrollment {
   studentId Int
   createdAt DateTime @default(now())
   
-  student Student @relation(fields: [studentId], references: [id])
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
   course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   
   @@unique([studentId, courseId])
@@ -101,7 +101,7 @@ model Wishlist {
   studentId Int
   createdAt DateTime @default(now())
   
-  student Student @relation(fields: [studentId], references: [id])
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
   course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   
   @@unique([studentId, courseId])

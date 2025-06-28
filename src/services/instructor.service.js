@@ -2,19 +2,22 @@ const prisma = require('../prisma');
 
 // Dashboard stats: counts courses and enrolled students for given instructorId
 const getDashboardStats = async (instructorId) => {
-  const instructorIdInt = parseInt(instructorId, 10);
+  const instructorIdInt = parseInt(instructorId);
   if (isNaN(instructorIdInt)) {
     throw new Error('Invalid instructor ID');
   }
+  const instructor = await prisma.instructor.findUnique({
+    where: { userId: instructorIdInt }
+  })
 
   const coursesCount = await prisma.course.count({
-    where: { instructorId: instructorIdInt },
+    where: { instructorId: instructor.id },
   });
 
   const studentsCount = await prisma.enrollment.count({
     where: {
       course: {
-        instructorId: instructorIdInt,
+        instructorId: instructor.id,
       },
     },
   });
@@ -24,14 +27,17 @@ const getDashboardStats = async (instructorId) => {
 
 // Get all students enrolled in instructor's courses
 const getStudents = async (instructorId) => {
-  const instructorIdInt = parseInt(instructorId, 10);
+  const instructorIdInt = parseInt(instructorId);
   if (isNaN(instructorIdInt)) throw new Error('Invalid instructor ID');
+  const instructor = await prisma.instructor.findUnique({
+    where: { userId: instructorIdInt }
+  })
 
   // Find all enrollments where course belongs to instructor
   const enrollments = await prisma.enrollment.findMany({
     where: {
       course: {
-        instructorId: instructorIdInt,
+        instructorId: instructor.id,
       },
     },
     select: {
@@ -48,7 +54,7 @@ const getStudents = async (instructorId) => {
         },
       },
     },
-    distinct: ['studentId'], // This ensures only unique students
+    distinct: ['studentId'],
   });
 
   // Map the results to flatten the structure
@@ -56,7 +62,7 @@ const getStudents = async (instructorId) => {
     id: enrollment.student.id,
     name: enrollment.student.name,
     phone: enrollment.student.phone,
-    email: enrollment.student.user.email, // Access nested user email
+    email: enrollment.student.user.email,
   }));
 
   return uniqueStudents;
@@ -233,10 +239,7 @@ const updateInstructor = async (instructorId, updateData) => {
     where: { id: instructorId },
     data: updateData,
   });
-
-  // Return all instructors (or just return the updated instructor if that's preferred)
-  const allInstructors = await prisma.instructor.findMany();
-  return allInstructors;
+  return updatedInstructor
 };
 
 

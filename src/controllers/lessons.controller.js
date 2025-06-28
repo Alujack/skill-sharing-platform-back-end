@@ -102,6 +102,7 @@ const createLesson = async (req, res) => {
         fs.renameSync(file.path, finalFilePath);
 
         const videoUrl = `/videos/course_${courseId}/${finalFileName}`;
+        console.log("i eacher here ");
         await lessonService.updateLessonVideoUrl(lessonId, videoUrl);
 
         res.status(201).json({
@@ -124,8 +125,7 @@ const createLesson = async (req, res) => {
 
 const updateLesson = async (req, res) => {
     const { lessonId } = req.params;
-    console.log(req.body)
-    const { title } = req.body;
+    const { title} = req.body;
     const file = req.file;
 
     if (!lessonId || isNaN(lessonId)) {

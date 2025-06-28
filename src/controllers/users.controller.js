@@ -23,15 +23,39 @@ exports.updateUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-  await prisma.user.delete({ where: { id: parseInt(req.params.id) } });
-  res.json({ message: 'User deleted' });
+  const userId = parseInt(req.params.id);
+
+  try {
+    // First check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        student: true,
+        instructor: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Delete the user (this will cascade to student/instructor records)
+    await prisma.user.delete({
+      where: { id: userId }
+    });
+
+    res.json({ message: 'User and all related data deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ message: 'Error deleting user', error: error.message });
+  }
 };
 
 exports.createInstructorProfile = async (req, res) => {
   const { bio } = req.body;
   const userId = parseInt(req.params.id);
   console.log("user id ==", userId)
-  console.log("bio ==",bio)
+  console.log("bio ==", bio)
 
   const exists = await prisma.instructorProfile.findUnique({ where: { userId } });
   if (exists) return res.status(400).json({ message: 'Profile already exists' });

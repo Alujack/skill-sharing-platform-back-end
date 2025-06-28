@@ -15,10 +15,10 @@ const validate = (validations) => [
   },
 ];
 
-router.get('/',  controller.getAllUsers);
+router.get('/', controller.getAllUsers);
 router.get('/:id', controller.getUserById);
 router.put('/:id', controller.updateUser);
-router.delete('/:id', isSelfOrAdmin, controller.deleteUser);
+router.delete('/:id', controller.deleteUser);
 
 router.post('/:id/instructor', validate(instructorProfileValidation), controller.createInstructorProfile);
 router.put('/:id/instructor', isSelfOrAdmin, validate(instructorProfileValidation), controller.updateInstructorProfile);
