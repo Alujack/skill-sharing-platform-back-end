@@ -109,10 +109,19 @@ const deleteInstructor = async (req, res) => {
     return res.status(400).json({ message: 'Instructor ID is required' });
   }
   try {
-    const instructor = await InstructorService.deleteInstructor(id)
-
+    const result = await InstructorService.deleteInstructor(id);
+    // Add this response:
+    res.status(200).json({
+      success: true,
+      message: 'Instructor deleted successfully',
+      data: result // optional - include if you want to return the deleted records
+    });
   } catch (e) {
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error(e); // Always log the error for debugging
+    res.status(500).json({
+      success: false,
+      message: e.message || 'Internal server error'
+    });
   }
 }
 const updateInstructor = async (req, res) => {

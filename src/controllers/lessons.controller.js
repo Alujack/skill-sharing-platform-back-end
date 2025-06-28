@@ -122,10 +122,11 @@ const createLesson = async (req, res) => {
     }
 };
 
-// Update lesson
 const updateLesson = async (req, res) => {
     const { lessonId } = req.params;
-    const updateData = req.body;
+    console.log(req.body)
+    const { title } = req.body;
+    const file = req.file;
 
     if (!lessonId || isNaN(lessonId)) {
         return res.status(400).json({
@@ -137,7 +138,7 @@ const updateLesson = async (req, res) => {
     try {
         const updatedLesson = await lessonService.updateLesson(
             Number(lessonId),
-            updateData
+            title
         );
 
         if (!updatedLesson) {
@@ -147,18 +148,40 @@ const updateLesson = async (req, res) => {
             });
         }
 
+        let videoUrl = updatedLesson.videoUrl;
+
+        // If new video file is uploaded, update it
+        if (file) {
+            const courseId = updatedLesson.courseId;
+            const courseDir = path.join(__dirname, '..', 'videos', `course_${courseId}`);
+            const finalFileName = `lesson_${lessonId}.mp4`;
+            const finalFilePath = path.join(courseDir, finalFileName);
+
+            fs.mkdirSync(courseDir, { recursive: true });
+            fs.renameSync(file.path, finalFilePath);
+
+            videoUrl = `/videos/course_${courseId}/${finalFileName}`;
+            await lessonService.updateLessonVideoUrl(lessonId, videoUrl);
+        }
+
         res.status(200).json({
             success: true,
-            data: updatedLesson
+            message: 'Lesson updated successfully',
+            data: {
+                ...updatedLesson,
+                videoUrl,
+            }
         });
     } catch (error) {
         console.error(`[Lesson Controller] updateLesson error (lessonId: ${lessonId}):`, error);
         res.status(500).json({
             success: false,
-            message: 'Server error while updating lesson'
+            message: 'Server error while updating lesson',
+            error: error.message
         });
     }
 };
+
 
 // Delete lesson
 const deleteLesson = async (req, res) => {

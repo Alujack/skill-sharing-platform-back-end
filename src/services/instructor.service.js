@@ -157,67 +157,77 @@ const getAllInstructors = async () => {
 
   return allInstructors;
 };
+
 const deleteInstructor = async (instructorIdParam) => {
-  const instructorId = parseInt(instructorIdParam);
-  console.log('id ==', instructorId);
+  try {
+    console.log('Starting deleteInstructor with param:', instructorIdParam);
 
-  // First find the instructor to get the userId
-  const instructor = await prisma.instructor.findUnique({
-    where: { id: instructorId }
-  });
-  console.log(instructor)
+    const instructorId = parseInt(instructorIdParam);
+    console.log('Parsed instructorId:', instructorId);
 
-  if (!instructor) {
-    throw new Error('Instructor not found');
-  }
-
-  // Delete all related records in a transaction
-  await prisma.$transaction([
-    // Delete all lessons for courses by this instructor
-    prisma.lesson.deleteMany({
-      where: {
-        course: {
-          instructorId: instructorId
-        }
-      }
-    }),
-    // Delete all enrollments for courses by this instructor
-    prisma.enrollment.deleteMany({
-      where: {
-        course: {
-          instructorId: instructorId
-        }
-      }
-    }),
-    // Delete all wishlists for courses by this instructor
-    prisma.wishlist.deleteMany({
-      where: {
-        course: {
-          instructorId: instructorId
-        }
-      }
-    }),
-    // Delete all courses by this instructor
-    prisma.course.deleteMany({
-      where: {
-        instructorId: instructorId
-      }
-    }),
-    // Delete the instructor
-    prisma.instructor.delete({
+    // First find the instructor to get the userId
+    console.log('Looking for instructor...');
+    const instructor = await prisma.instructor.findUnique({
       where: { id: instructorId }
-    }),
-    // Delete the user
-    prisma.user.delete({
-      where: { id: instructor.userId }
-    })
-  ]);
+    });
+    console.log('Found instructor:', instructor);
 
-  // Return all remaining instructors
-  const allInstructors = await prisma.instructor.findMany();
-  return allInstructors;
+    if (!instructor) {
+      throw new Error('Instructor not found');
+    }
+
+    console.log('Starting transaction to delete related records...');
+
+    // Delete all related records in a transaction
+    const result = await prisma.$transaction([
+      // Delete all lessons for courses by this instructor
+      prisma.lesson.deleteMany({
+        where: {
+          course: {
+            instructorId: instructorId
+          }
+        }
+      }),
+      // Delete all enrollments for courses by this instructor
+      prisma.enrollment.deleteMany({
+        where: {
+          course: {
+            instructorId: instructorId
+          }
+        }
+      }),
+      // Delete all wishlists for courses by this instructor
+      prisma.wishlist.deleteMany({
+        where: {
+          course: {
+            instructorId: instructorId
+          }
+        }
+      }),
+      // Delete all courses by this instructor
+      prisma.course.deleteMany({
+        where: {
+          instructorId: instructorId
+        }
+      }),
+      // Delete the instructor
+      prisma.instructor.delete({
+        where: { id: instructorId }
+      }),
+      // Delete the user
+      prisma.user.delete({
+        where: { id: instructor.userId }
+      })
+    ]);
+
+    console.log('Transaction completed successfully:', result);
+    return result;
+
+  } catch (error) {
+    console.error('Error in deleteInstructor:', error);
+    throw error; // Re-throw the error after logging
+  }
 };
-
 const updateInstructor = async (instructorId, updateData) => {
   const updatedInstructor = await prisma.instructor.update({
     where: { id: instructorId },

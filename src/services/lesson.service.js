@@ -54,11 +54,13 @@ const createLesson = async ({ title, videoUrl = '', courseId }) => {
     }
 };
 
-const updateLesson = async (id, updateData) => {
+const updateLesson = async (id, title) => {
     try {
         return await prisma.lesson.update({
             where: { id },
-            data: updateData,
+            data: {
+                title
+            },
         });
     } catch (error) {
         console.error("Error updating lesson:", error);

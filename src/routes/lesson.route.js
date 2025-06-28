@@ -16,9 +16,9 @@ router.get('/:lessonId', getLessonById);
 router.post('/upload', upload.single('video'), createLesson);
 
 // Update a lesson
-router.put('/:lessonId', updateLesson);
+router.put('/:lessonId', upload.single('video'), updateLesson);
 
 // Delete a lesson
-router.delete('/:lessonId', deleteLesson);
+router.delete('/:lessonId', upload.single('video'), deleteLesson);
 
 module.exports = router;
