@@ -17,6 +17,7 @@ const adminDashboardRoutes = require('./routes/admin.dashboard.route')
 const categoryRoutes = require('./routes/category.routes');
 const lessonRoutes = require('./routes/lesson.route');
 const wishlistRoutes = require('./routes/whishlist.router')
+const path = require('path');
 
 
 
@@ -43,6 +44,7 @@ app.use('/v1/dashboard', adminDashboardRoutes);
 app.use('/v1/categories', categoryRoutes);
 app.use('/v1/lesson', lessonRoutes);
 app.use('/v1/wishlist', wishlistRoutes);
+app.use('/videos', express.static(path.join(__dirname, 'videos')));
 
 
 // 404 handler

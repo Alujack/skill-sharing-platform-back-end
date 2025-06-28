@@ -103,6 +103,31 @@ const getAllInstructors = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 }
+const deleteInstructor = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ message: 'Instructor ID is required' });
+  }
+  try {
+    const instructor = await InstructorService.deleteInstructor(id)
+
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+const updateInstructor = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ message: 'Instructor ID is required' });
+  }
+  try {
+    const instructor = await InstructorService.updateInstructor(id, req.body)
+
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
 
 module.exports = {
   getInstructorDashboard,
@@ -112,5 +137,7 @@ module.exports = {
   becomeToInstrutor,
   getPendingInstructors,
   getApprovedInstructors,
-  getAllInstructors
+  getAllInstructors,
+  deleteInstructor,
+  updateInstructor,
 };

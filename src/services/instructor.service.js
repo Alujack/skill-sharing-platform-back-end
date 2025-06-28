@@ -157,6 +157,77 @@ const getAllInstructors = async () => {
 
   return allInstructors;
 };
+const deleteInstructor = async (instructorIdParam) => {
+  const instructorId = parseInt(instructorIdParam);
+  console.log('id ==', instructorId);
+
+  // First find the instructor to get the userId
+  const instructor = await prisma.instructor.findUnique({
+    where: { id: instructorId }
+  });
+  console.log(instructor)
+
+  if (!instructor) {
+    throw new Error('Instructor not found');
+  }
+
+  // Delete all related records in a transaction
+  await prisma.$transaction([
+    // Delete all lessons for courses by this instructor
+    prisma.lesson.deleteMany({
+      where: {
+        course: {
+          instructorId: instructorId
+        }
+      }
+    }),
+    // Delete all enrollments for courses by this instructor
+    prisma.enrollment.deleteMany({
+      where: {
+        course: {
+          instructorId: instructorId
+        }
+      }
+    }),
+    // Delete all wishlists for courses by this instructor
+    prisma.wishlist.deleteMany({
+      where: {
+        course: {
+          instructorId: instructorId
+        }
+      }
+    }),
+    // Delete all courses by this instructor
+    prisma.course.deleteMany({
+      where: {
+        instructorId: instructorId
+      }
+    }),
+    // Delete the instructor
+    prisma.instructor.delete({
+      where: { id: instructorId }
+    }),
+    // Delete the user
+    prisma.user.delete({
+      where: { id: instructor.userId }
+    })
+  ]);
+
+  // Return all remaining instructors
+  const allInstructors = await prisma.instructor.findMany();
+  return allInstructors;
+};
+
+const updateInstructor = async (instructorId, updateData) => {
+  const updatedInstructor = await prisma.instructor.update({
+    where: { id: instructorId },
+    data: updateData,
+  });
+
+  // Return all instructors (or just return the updated instructor if that's preferred)
+  const allInstructors = await prisma.instructor.findMany();
+  return allInstructors;
+};
 
 
 
@@ -168,5 +239,7 @@ module.exports = {
   becomeToInstrutor,
   getPendingInstructors,
   getApprocedInstructors,
-  getAllInstructors
+  getAllInstructors,
+  deleteInstructor,
+  updateInstructor
 };

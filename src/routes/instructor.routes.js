@@ -7,7 +7,9 @@ const {
     becomeToInstrutor,
     getPendingInstructors,
     getApprovedInstructors,
-    getAllInstructors
+    getAllInstructors,
+    deleteInstructor,
+    updateInstructor,
 
 } = require('../controllers/instructor.controller');
 const { auth, authorizeRoles } = require('../middlewares/auth.middleware');
@@ -31,5 +33,7 @@ router.post('/become-instructor', becomeToInstrutor)
 router.get('/pending', getPendingInstructors)
 router.get('/approved', getApprovedInstructors)
 router.get('/all', getAllInstructors);
+router.delete('/:id', deleteInstructor)
+router.put('/:id', updateInstructor)
 
 module.exports = router;

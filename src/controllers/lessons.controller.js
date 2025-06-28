@@ -79,7 +79,6 @@ const createLesson = async (req, res) => {
         const { title, courseId } = req.body;
         const file = req.file;
 
-        // Validation
         if (!title || !courseId || !file) {
             return res.status(400).json({
                 success: false,
@@ -87,10 +86,10 @@ const createLesson = async (req, res) => {
             });
         }
 
-        // 1. Create lesson without videoUrl for now
+        // Create lesson without videoUrl for now
         const newLesson = await lessonService.createLesson({
             title,
-            videoUrl: '',
+            videoUrl: '', // initially empty
             courseId: Number(courseId),
         });
 
@@ -99,16 +98,10 @@ const createLesson = async (req, res) => {
         const finalFileName = `lesson_${lessonId}.mp4`;
         const finalFilePath = path.join(courseDir, finalFileName);
 
-        // 2. Create directory if not exist
         fs.mkdirSync(courseDir, { recursive: true });
-
-        // 3. Move file to permanent location
         fs.renameSync(file.path, finalFilePath);
 
-        // 4. Build public path for frontend (if serving statically)
         const videoUrl = `/videos/course_${courseId}/${finalFileName}`;
-
-        // 5. Update lesson with final video URL
         await lessonService.updateLessonVideoUrl(lessonId, videoUrl);
 
         res.status(201).json({

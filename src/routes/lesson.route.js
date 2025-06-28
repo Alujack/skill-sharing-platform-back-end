@@ -13,11 +13,7 @@ router.get('/course/:courseId', getLessonByCourse);
 router.get('/:lessonId', getLessonById);
 
 // Create a new lesson
-router.post(
-    '/',
-    upload.single('video'), // 👈 handle video upload field name
-    lessonController.createLesson
-);
+router.post('/upload', upload.single('video'), createLesson);
 
 // Update a lesson
 router.put('/:lessonId', updateLesson);
